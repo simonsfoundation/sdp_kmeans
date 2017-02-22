@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 import seaborn.apionly as sns
 from sdp_kmeans.sdp import sdp_kmeans_multilayer
