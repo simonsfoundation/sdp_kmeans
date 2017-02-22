@@ -137,7 +137,7 @@ def test_burer_monteiro(X, ranks, filename):
         plt.xlabel('{0:2.2f}%'.format(err * 100), fontsize='x-large')
         print('Rank', r, err)
 
-    # plt.savefig('{}{}_burer-monteiro.pdf'.format(dir_name, filename))
+    plt.savefig('{}{}_burer-monteiro.pdf'.format(dir_name, filename))
 
 
 if __name__ == '__main__':
@@ -147,18 +147,18 @@ if __name__ == '__main__':
     X, gt = toy.double_swiss_roll()
     test_reconstruction(X, gt, 64, 'double-swiss-roll', from_file=True)
 
-    # X, gt = toy.circles()
-    # X = X[gt == 0]
-    # gt = gt[gt == 0]
-    # test_reconstruction(X, gt, 16, 'ring', from_file=False)
-    #
-    # test__circles_visualization([64, 200])
-    #
-    # X, _ = toy.circles()
-    # X = X[:100, :]
-    # test_burer_monteiro(X, [8, 16, 32, 64, 128, 256], 'circles')
-    #
-    # X = real.teapot()
-    # test_burer_monteiro(X, [20, 40, 60, 80, 100, 120], 'teapot')
+    X, gt = toy.circles()
+    X = X[gt == 0]
+    gt = gt[gt == 0]
+    test_reconstruction(X, gt, 16, 'ring', from_file=False)
+
+    test__circles_visualization([64, 200])
+
+    X, _ = toy.circles()
+    X = X[:100, :]
+    test_burer_monteiro(X, [8, 16, 32, 64, 128, 256], 'circles')
+
+    X = real.teapot()
+    test_burer_monteiro(X, [20, 40, 60, 80, 100, 120], 'teapot')
 
     plt.show()

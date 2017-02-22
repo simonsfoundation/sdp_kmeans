@@ -182,7 +182,7 @@ def test_turntable(layer_sizes, target_dim):
 
 
 if __name__ == '__main__':
-    # test_thin_lines([32, 16, 8, 6], 1)
+    test_thin_lines([32, 16, 8, 6], 1)
     test_turntable([32, 16, 8, 4, 2], 2)
 
     plt.show()
