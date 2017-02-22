@@ -30,7 +30,7 @@ def cluster_sdp(D, n_clusters):
     return np.asarray(Z.value)
 
 
-def cluster_sdp_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-6):
+def cluster_sdp_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     if rank is None:
         rank = 2 * n_clusters
 
