@@ -1,6 +1,6 @@
 import numpy as np
-from numpy.linalg import eigh, svd
-from clustering.sdp import sdp_kmeans_multilayer
+from numpy.linalg import eigh
+from sdp_kmeans.sdp import sdp_kmeans_multilayer
 
 
 def sdp_kmeans_embedding(X, n_clusters, target_dim, ret_sdp=False):
@@ -36,5 +36,3 @@ def variance_explaned(eigvals, eigvals_crop):
     eigvals[eigvals < 0] = 0
     var = np.sum(eigvals_crop) / np.sum(eigvals)
     print('Variance explained:', var)
-    # print('Eigenvalues:', eigvals / np.sum(eigvals))
-

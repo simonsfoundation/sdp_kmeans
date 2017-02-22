@@ -6,8 +6,8 @@ import numpy as np
 import os
 import seaborn.apionly as sns
 import sklearn.cluster as sk_cluster
-from clustering.embedding import spectral_embedding
-from clustering.sdp import sdp_kmeans_multilayer
+from sdp_kmeans.embedding import spectral_embedding
+from sdp_kmeans.sdp import sdp_kmeans_multilayer
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_clustered, plot_data_embedded,\
     plot_images_embedded

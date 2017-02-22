@@ -6,8 +6,8 @@ import os
 import scipy.io
 from scipy.stats import circmean
 import seaborn as sns
-from clustering.nmf import symnmf_admm
-from clustering.sdp import sdp_kmeans_multilayer, cluster_sdp_burer_monteiro
+from sdp_kmeans.nmf import symnmf_admm
+from sdp_kmeans.sdp import sdp_kmeans_multilayer, cluster_sdp_burer_monteiro
 from data import real, toy
 from tests.utils import plot_matrix, plot_data_clustered
 

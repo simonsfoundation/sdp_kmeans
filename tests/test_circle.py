@@ -6,14 +6,14 @@ import numpy as np
 import os
 from scipy.linalg import dft
 import seaborn.apionly as sns
-from clustering.sdp import sdp_kmeans_multilayer, dot_matrix
+from sdp_kmeans.sdp import sdp_kmeans_multilayer, dot_matrix
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered
 
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'clustering/'
+dir_name += 'sdp_kmeans/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 

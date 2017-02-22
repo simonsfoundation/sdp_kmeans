@@ -4,7 +4,7 @@ import numpy as np
 import scipy.optimize
 # from sklearn.decomposition.nmf import non_negative_factorization
 # from scipy.sparse.linalg import eigsh
-from clustering.utils import dot_matrix
+from sdp_kmeans.utils import dot_matrix
 
 
 # def cluster(X, n_clusters, build_gramian=True):
@@ -79,9 +79,9 @@ def symnmf_anls(A, k, H=None, maxiter=1e3, tol=1e-3, alpha=0,
     #              debug=2: Output the norms of projected gradient
     #                       in each iteration
     #
-    #   In the context of graph clustering, 'A' is a symmetric matrix containing
+    #   In the context of graph sdp_kmeans, 'A' is a symmetric matrix containing
     #   similarity values between every pair of data points in a data set of size 'n'.
-    #   The output 'H' is a clustering indicator matrix, and clustering assignments
+    #   The output 'H' is a sdp_kmeans indicator matrix, and sdp_kmeans assignments
     #   are indicated by the largest entry in each row of 'H'.
     #
     A_pos = A.copy()

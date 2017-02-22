@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import os
 import seaborn.apionly as sns
 import sys
-from clustering.embedding import sdp_kmeans_embedding
+from sdp_kmeans.embedding import sdp_kmeans_embedding
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_embedded, plot_images_embedded,\
     Logger

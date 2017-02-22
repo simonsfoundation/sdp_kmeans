@@ -3,8 +3,8 @@ import cvxpy as cp
 from functools import partial
 import numpy as np
 from scipy.optimize import minimize
-from clustering.nmf import symnmf_admm
-from clustering.utils import dot_matrix
+from sdp_kmeans.nmf import symnmf_admm
+from sdp_kmeans.utils import dot_matrix
 
 
 def sdp_kmeans_multilayer(X, layer_sizes):

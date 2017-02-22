@@ -8,8 +8,8 @@ import seaborn.apionly as sns
 import sklearn.cluster as sk_cluster
 import sklearn.metrics as sk_metrics
 import sys
-from clustering.nmf import symnmf_admm
-from clustering.sdp import sdp_kmeans_multilayer
+from sdp_kmeans.nmf import symnmf_admm
+from sdp_kmeans.sdp import sdp_kmeans_multilayer
 from data import real
 from tests.utils import plot_confusion_matrix, line_plot_clustered,\
     plot_matrix, Logger
@@ -17,7 +17,7 @@ from tests.utils import plot_confusion_matrix, line_plot_clustered,\
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'clustering/'
+dir_name += 'sdp_kmeans/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
@@ -80,7 +80,7 @@ def test_multilayer(X, gt, layer_sizes, filename,
                                        labels_spectral == k)
                               for k in range(layer_sizes[-1])])
 
-    print('Spectral clustering - scale={}'.format(scale))
+    print('Spectral sdp_kmeans - scale={}'.format(scale))
     print('adjusted_mutual_info_score', amis_max)
     print('confusion_matrix:\n', conf_mat_spectral)
 
