@@ -4,9 +4,10 @@ import numpy as np
 import os
 import pickle
 import timeit
+import sys
 from data import real
 from sdp_kmeans.sdp import sdp_kmeans_multilayer, cluster_sdp_burer_monteiro
-from tests.utils import plot_matrix
+from tests.utils import Logger
 
 
 dir_name = '../results/'
@@ -47,7 +48,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1):
             t = timeit.default_timer() - t
             time_sdp_bm[rf][n_samples] = t
             Q_bm = Y.dot(Y.T)
-            if n_samples < 400:
+            if n_samples < 1000:
                 rel_err = (np.linalg.norm(Q_sdp[-1] - Q_bm, 'fro')
                            / np.linalg.norm(Q_sdp[-1], 'fro'))
                 rel_err_sdp_bm[rf][n_samples] = rel_err
@@ -65,6 +66,9 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1):
 
 
 if __name__ == '__main__':
+    logger = Logger(dir_name + 'test_clustering_real.txt')
+    sys.stdout = logger
+
     n_samples_range = list(range(50, 1000, 50))
     n_samples_range += list(range(1000, 2000, 100))
     n_samples_range += list(range(2000, 10001, 1000))
@@ -81,4 +85,6 @@ if __name__ == '__main__':
     print(time_sdp_bm)
     print(rel_err_sdp_bm)
 
-    plt.show()
+    sys.stdout = logger.stdout
+    logger.close()
+
