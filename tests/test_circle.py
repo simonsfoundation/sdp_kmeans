@@ -13,7 +13,7 @@ from tests.utils import plot_matrix, plot_data_clustered
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'clustering/'
+dir_name += 'circle/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
@@ -216,9 +216,11 @@ def test_circle_sdp_lp():
     plt.subplot(223)
     plt.plot(eigvals, linewidth=3)
     plt.ylim(0, 1)
+    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
     plt.subplot(224)
     plt.plot(q, linewidth=3)
     plt.ylim(0, 1)
+    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
 
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp'))
 
