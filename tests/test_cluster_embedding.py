@@ -77,9 +77,11 @@ def test_thin_lines(layer_sizes, target_dim):
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian',
+                         fontsize='xx-large')
         else:
-            ax.set_title('Layer {} (K={})'.format(i, layer_sizes[i-1]))
+            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
+            ax.set_title(title, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         if X.shape[1] == 2:
@@ -151,9 +153,11 @@ def test_turntable(layer_sizes, target_dim):
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian',
+                         fontsize='xx-large')
         else:
-            ax.set_title('Layer {} (K={})'.format(i, layer_sizes[i-1]))
+            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
+            ax.set_title(title, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         if X.shape[1] == 2:
