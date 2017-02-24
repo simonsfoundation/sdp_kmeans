@@ -10,7 +10,7 @@ from tests.utils import plot_matrix, plot_data_clustered
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'sdp_kmeans/'
+dir_name += 'clustering/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
@@ -40,10 +40,11 @@ def test_multilayer(cluster_multilayer, X, gt, layer_sizes, filename,
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian',
+                         fontsize='xx-large')
         else:
-            ax.set_title('Layer {0}: '
-                         '$\mathbf{{Q}}$ (K={1})'.format(i, layer_sizes[i-1]))
+            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
+            ax.set_title(title, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         plot_data_clustered(reps, gt, marker='x', ax=ax)
