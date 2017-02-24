@@ -60,17 +60,17 @@ def test_reconstruction(X, gt, layer_size, filename, from_file=False):
     plt.savefig('{}{}_solution.pdf'.format(dir_name, filename))
 
     plt.figure(tight_layout=True)
-    rec_errors = -np.log10(rec_errors)
     mean = np.mean(rec_errors, axis=1)
     std = np.std(rec_errors, axis=1)
     sns.set_palette('muted')
     plt.fill_between(np.squeeze(k_values), mean - 2 * std, mean + 2 * std,
                      alpha=0.3)
-    plt.plot(np.squeeze(k_values), mean, linewidth=2)
-    plt.plot([layer_size, layer_size], [mean.min(), mean.max()],
-             linestyle='--', linewidth=2)
-    plt.xlabel('$r$', size='x-large')
-    plt.ylabel('Relative reconstruction error ($-log_{10}$)', size='x-large')
+    plt.semilogy(np.squeeze(k_values), mean, linewidth=2)
+    plt.semilogy([layer_size, layer_size], [mean.min(), mean.max()],
+                 linestyle='--', linewidth=2)
+    plt.xlabel('$r$', size='xx-large')
+    plt.ylabel('Relative reconstruction error', size='xx-large')
+    plt.ylim(np.floor(rec_errors.min() * 1e3) / 1e3, 1)
     plt.savefig('{}{}_curve.pdf'.format(dir_name, filename))
 
 
