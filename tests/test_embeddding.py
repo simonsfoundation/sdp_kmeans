@@ -39,9 +39,10 @@ def test_toy_embedding(X, n_clusters, target_dim, filename):
         ax = plt.subplot(gs[i+1])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian', fontsize='xx-large')
         else:
-            ax.set_title('$\mathbf{{Q}}$ (K={0})'.format(n_clusters))
+            title = '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)
+            ax.set_title(title, fontsize='xx-large')
 
     ax = plt.subplot(gs[3])
     plot_data_embedded(embedding, ax=ax)
@@ -65,9 +66,10 @@ def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
         ax = plt.subplot(gs[i])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian', fontsize='xx-large')
         else:
-            ax.set_title('$\mathbf{{Q}}$ (K={0})'.format(n_clusters))
+            title = '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)
+            ax.set_title(title, fontsize='xx-large')
 
     ax = plt.subplot(gs[2])
     plot_images_embedded(embedding, img_getter, labels=labels,
