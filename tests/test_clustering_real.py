@@ -17,7 +17,7 @@ from tests.utils import plot_confusion_matrix, line_plot_clustered,\
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'sdp_kmeans/'
+dir_name += 'clustering/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
