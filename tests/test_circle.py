@@ -13,7 +13,7 @@ from tests.utils import plot_matrix, plot_data_clustered
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
-dir_name += 'sdp_kmeans/'
+dir_name += 'clustering/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
@@ -47,9 +47,10 @@ def test_circles():
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Original Gramian')
+            ax.set_title('Input Gramian', fontsize='xx-large')
         else:
-            ax.set_title('Layer {} (K={})'.format(i, layer_sizes[i-1]))
+            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
+            ax.set_title(title, fontsize='xx-large')
 
         eigvals, eigvecs = np.linalg.eigh(D_input)
         mask = eigvals >= (layer_sizes[i-1] * 1e-2)
@@ -207,9 +208,9 @@ def test_circle_sdp_lp():
     plt.figure(figsize=(8, 8), tight_layout=True)
     ax = plt.subplot(221)
     plot_matrix(D_sdp, ax=ax)
-    plt.title('SDP solution', fontdict=dict(size='x-large'))
+    plt.title('SDP solution', fontdict=dict(size='xx-large'))
     ax = plt.subplot(222)
-    plt.title('LP solution', fontdict=dict(size='x-large'))
+    plt.title('LP solution', fontdict=dict(size='xx-large'))
     plot_matrix(D_lp, ax=ax)
 
     plt.subplot(223)
@@ -226,8 +227,8 @@ def test_circle_sdp_lp():
 
 
 if __name__ == '__main__':
-    # test_circles()
-    # test_one_circle()
+    test_circles()
+    test_one_circle()
     test_circle_sdp_lp()
 
     plt.show()
