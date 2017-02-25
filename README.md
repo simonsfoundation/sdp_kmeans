@@ -1,7 +1,7 @@
 The sdp_kmeans repository contains the code corresponding to the paper:
 
     Mariano Tepper, Anirvan Sengupta, Dmitri Chklovskii
-    Convex problems for data analysis  without kernels, 2017
+    An end-to-end optimization framework for unsupervised manifold learning, 2017
 
 Dependencies: cvxpy matplotlib numpy pillow scipy seaborn
 
