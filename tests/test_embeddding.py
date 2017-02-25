@@ -39,7 +39,7 @@ def test_toy_embedding(X, n_clusters, target_dim, filename):
         ax = plt.subplot(gs[i+1])
         plot_matrix(D_input, ax=ax)
         if i == 0:
-            ax.set_title('Input Gramian', fontsize='xx-large')
+            ax.set_title('Input Gramian $\mathbf{{D}}$', fontsize='xx-large')
         else:
             title = '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)
             ax.set_title(title, fontsize='xx-large')
