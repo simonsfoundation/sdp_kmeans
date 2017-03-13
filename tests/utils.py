@@ -41,7 +41,6 @@ def plot_matrix(mat, cmap='gray_r', ax=None):
         mat = ((vmin + vmax) / 2) * np.ones_like(mat)
         ax.imshow(mat, interpolation='none', cmap=cmap)
 
-
     ax.imshow(mat, interpolation='none', cmap=cmap, vmin=vmin, vmax=vmax)
     ax.grid(False)
     ax.tick_params(axis='both',
