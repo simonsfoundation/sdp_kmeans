@@ -7,7 +7,7 @@ import scipy.io
 from scipy.stats import circmean
 import seaborn as sns
 from sdp_kmeans.nmf import symnmf_admm
-from sdp_kmeans.sdp import sdp_kmeans_multilayer, cluster_sdp_burer_monteiro
+from sdp_kmeans.sdp import sdp_kmeans_multilayer
 from data import real, toy
 from tests.utils import plot_matrix, plot_data_clustered
 
@@ -21,7 +21,7 @@ if not os.path.exists(dir_name):
 
 
 def test_reconstruction(X, gt, layer_size, filename, from_file=False):
-    Ds = sdp_kmeans_multilayer(X, [layer_size])
+    Ds = sdp_kmeans_multilayer(X, [layer_size], method='cvx')
 
     if from_file:
         data = scipy.io.loadmat('{}{}.mat'.format(dir_name, filename))
@@ -126,7 +126,7 @@ def test_burer_monteiro(X, ranks, filename):
     plt.title(r'$\mathbf{{Q}}_*$', fontsize='x-large')
 
     for i, r in enumerate(ranks):
-        Y = cluster_sdp_burer_monteiro(X, ranks[0], rank=r)
+        Y = sdp_kmeans_multilayer(X, ranks[0], rank=r, method='cvx')
         Q_nc = Y.dot(Y.T)
         err = np.linalg.norm(Qs[1] - Q_nc, 'fro') / np.linalg.norm(Qs[1], 'fro')
 

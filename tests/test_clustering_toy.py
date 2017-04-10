@@ -15,9 +15,9 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def test_multilayer(cluster_multilayer, X, gt, layer_sizes, filename,
+def test_multilayer(X, gt, layer_sizes, filename,
                     figsize=(12, 5.5)):
-    Ds = cluster_multilayer(X, layer_sizes)
+    Ds = sdp_kmeans_multilayer(X, layer_sizes, method='bm')
 
     sns.set_style('white')
     plt.figure(figsize=figsize, tight_layout=True)
@@ -54,19 +54,16 @@ def test_multilayer(cluster_multilayer, X, gt, layer_sizes, filename,
 
 if __name__ == '__main__':
     X, gt = toy.gaussian_blobs()
-    test_multilayer(sdp_kmeans_multilayer, X, gt, [16, 8, 6],
-                    'gaussian_blobs')
+    test_multilayer(X, gt, [16, 8, 6], 'gaussian_blobs')
 
     X, gt = toy.circles()
-    test_multilayer(sdp_kmeans_multilayer, X, gt, [16, 8, 4, 2], 'circles',
-                    figsize=(12, 4.2))
+    test_multilayer(X, gt, [16, 8, 4, 2], 'circles', figsize=(12, 4.2))
 
     X, gt = toy.moons()
-    test_multilayer(sdp_kmeans_multilayer, X, gt, [16, 8, 4, 2], 'moons',
-                    figsize=(12, 4.2))
+    test_multilayer(X, gt, [16, 8, 4, 2], 'moons', figsize=(12, 4.2))
 
     X, gt = toy.double_swiss_roll()
-    test_multilayer(sdp_kmeans_multilayer, X, gt, [64, 32, 16, 8, 4, 2],
-                    'double_swiss_roll', figsize=(16, 4.3))
+    test_multilayer(X, gt, [64, 32, 16, 8, 4, 2], 'double_swiss_roll',
+                    figsize=(16, 4.3))
 
     plt.show()

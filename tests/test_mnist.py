@@ -7,7 +7,7 @@ import timeit
 import seaborn.apionly as sns
 import sys
 from data import real
-from sdp_kmeans.sdp import sdp_kmeans_multilayer, cluster_sdp_burer_monteiro
+from sdp_kmeans.sdp import sdp_kmeans_multilayer, sdp_km_burer_monteiro
 from tests.utils import Logger
 
 
@@ -50,7 +50,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
             for rf in rank_factors:
                 np.random.seed(0)
                 t = timeit.default_timer()
-                Y = cluster_sdp_burer_monteiro(X, k, rank=k * rf)
+                Y = sdp_km_burer_monteiro(X, k, rank=k * rf)
                 t = timeit.default_timer() - t
                 time_sdp_bm[rf][n_samples] = t
                 Q_bm = Y.dot(Y.T)

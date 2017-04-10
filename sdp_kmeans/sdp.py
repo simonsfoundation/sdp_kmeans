@@ -7,17 +7,26 @@ from sdp_kmeans.nmf import symnmf_admm
 from sdp_kmeans.utils import dot_matrix
 
 
-def sdp_kmeans_multilayer(X, layer_sizes):
-    D = dot_matrix(X)
+def sdp_kmeans_multilayer(X, layer_sizes, method='cvx'):
+    if method == 'cvx':
+        solver = sdp_kmeans_multilayer_cvx
+    elif method == 'bm':
+        solver = sdp_kmeans_multilayer_bm
+    else:
+        raise ValueError('The method should be one of "cvx" and "bm"')
 
-    Ds = [D]
+    return solver(X, layer_sizes)
+
+
+def sdp_kmeans_multilayer_cvx(X, layer_sizes):
+    Ds = [dot_matrix(X)]
     for size in layer_sizes:
-        D_sdp = cluster_sdp(Ds[-1], size)
+        D_sdp = sdp_km(Ds[-1], size)
         Ds.append(D_sdp)
     return Ds
 
 
-def cluster_sdp(D, n_clusters):
+def sdp_km(D, n_clusters):
     Z = cp.Semidef(D.shape[0])
     ones = np.ones((D.shape[0], 1))
     objective = cp.Maximize(cp.trace(D * Z))
@@ -30,9 +39,18 @@ def cluster_sdp(D, n_clusters):
     return np.asarray(Z.value)
 
 
-def cluster_sdp_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
+def sdp_kmeans_multilayer_bm(X, layer_sizes):
+    Ys = [X]
+    for size in layer_sizes:
+        Y = sdp_km_burer_monteiro(Ys[-1], size)
+        Ys.append(Y)
+    Ds = [Y.dot(Y.T) for Y in Ys]
+    return Ds
+
+
+def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     if rank is None:
-        rank = 2 * n_clusters
+        rank = 8 * n_clusters
 
     X_norm = X - np.mean(X, axis=0)
     cov = X_norm.T.dot(X_norm)
