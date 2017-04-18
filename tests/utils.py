@@ -103,7 +103,7 @@ def plot_data_clustered(X, gt, marker='o', ax=None):
                    labelbottom='off', labelleft='off')
 
 
-def plot_data_embedded(X, palette='hls', marker='o', ax=None):
+def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
     if ax is None:
         ax = plt.gca()
 
@@ -132,6 +132,9 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None):
                        labelbottom='off', labelleft='off')
 
     elif X.shape[1] == 3:
+        if elev_azim is not None:
+            ax.view_init(elev=elev_azim[0], azim=elev_azim[1])
+
         ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=colors, edgecolors=colors,
                    marker=marker)
 
