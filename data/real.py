@@ -57,6 +57,10 @@ def mnist(digit='all', n_samples=0, return_gt=False):
         X = X[selection, :]
         gt = gt[selection]
 
+        idx = np.argsort(gt)
+        X = X[idx, :]
+        gt = gt[idx]
+
     if return_gt:
         return X, gt
     else:
