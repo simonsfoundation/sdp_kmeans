@@ -16,7 +16,8 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def test_toy_embedding(X, n_clusters, target_dim, filename):
+def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
+                       elev_azim=None):
     print('--------\n', filename)
 
     embedding, Ds = sdp_kmeans_embedding(X, n_clusters, target_dim,
@@ -31,7 +32,7 @@ def test_toy_embedding(X, n_clusters, target_dim, filename):
         ax = plt.subplot(gs[0])
     if X.shape[1] == 3:
         ax = plt.subplot(gs[0], projection='3d')
-    plot_data_embedded(X, ax=ax)
+    plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
 
     for i, D_input in enumerate(Ds):
         ax = plt.subplot(gs[i+1])
@@ -43,7 +44,7 @@ def test_toy_embedding(X, n_clusters, target_dim, filename):
             ax.set_title(title, fontsize='xx-large')
 
     ax = plt.subplot(gs[3])
-    plot_data_embedded(embedding, ax=ax)
+    plot_data_embedded(embedding, ax=ax, palette=palette)
 
     plt.savefig('{}{}.pdf'.format(dir_name, filename))
 
@@ -81,6 +82,12 @@ def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
                          subsampling=subsampling,
                          zoom=zoom, palette=palette)
     plt.savefig('{}{}_embedding.pdf'.format(dir_name, filename))
+
+
+def test_swiss_roll():
+    X = toy.swiss_roll_3d(n_samples=1000)
+    test_toy_embedding(X, 32, 2, 'swiss_roll_3d', palette='Spectral',
+                       elev_azim=(7, -80))
 
 
 def test_trefoil():
@@ -129,5 +136,6 @@ if __name__ == '__main__':
     test_yale_faces(subjects=[1, 4, 5])
     test_yale_faces(subjects=[1, 4, 37])
     test_yale_faces(subjects=[1, 4, 5, 27])
+    test_swiss_roll()
 
     plt.show()
