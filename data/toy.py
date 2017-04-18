@@ -62,31 +62,32 @@ def moons():
     return X, gt
 
 
+def swiss_roll_2d(n_samples=100, noise=0.0, regular=True, random_state=None):
+    if regular:
+        generator = check_random_state(random_state)
+        t = 1.5 * np.pi * (1 + 2 * np.linspace(0, 1, n_samples))
+        t = t[np.newaxis, :]
+        x = t * np.cos(t)
+        y = t * np.sin(t)
+
+        X = np.concatenate((x, y))
+        X += noise * generator.randn(2, n_samples)
+        X = X.T
+        t = np.squeeze(t)
+
+        return X, t
+    else:
+        X, t = sk_datasets.make_swiss_roll(n_samples=n_samples, noise=noise,
+                                           random_state=random_state)
+        X = X[:, [0, 2]]
+        idx = np.argsort(t)
+        return X[idx, :], t[idx]
+
+
 def double_swiss_roll(n_samples=200, regular=True):
-    def make_swiss_roll(n_samples=100, noise=0.0, random_state=None):
-        if regular:
-            generator = check_random_state(random_state)
-            t = 1.5 * np.pi * (1 + 2 * np.linspace(0, 1, n_samples))
-            t = t[np.newaxis, :]
-            x = t * np.cos(t)
-            y = t * np.sin(t)
-
-            X = np.concatenate((x, y))
-            X += noise * generator.randn(2, n_samples)
-            X = X.T
-            t = np.squeeze(t)
-
-            return X, t
-        else:
-            X, t = sk_datasets.make_swiss_roll(n_samples=n_samples, noise=noise,
-                                               random_state=random_state)
-            X = X[:, [0, 2]]
-            idx = np.argsort(t)
-            return X[idx, :], t[idx]
-
     random_state = 0
-    X1, t = make_swiss_roll(n_samples=n_samples // 2, noise=.0,
-                            random_state=random_state)
+    X1, _ = swiss_roll_2d(n_samples=n_samples // 2, noise=.0, regular=regular,
+                          random_state=random_state)
 
     theta = np.pi
     X2 = X1.dot(np.array([[np.cos(theta), np.sin(theta)],
@@ -95,6 +96,17 @@ def double_swiss_roll(n_samples=200, regular=True):
     gt = np.zeros((len(X),))
     gt[len(X1):] = 1
     return X, gt
+
+
+def swiss_roll_3d(n_samples=800):
+    random_state = 0
+    X, t = sk_datasets.make_swiss_roll(n_samples=n_samples,
+                                       random_state=random_state)
+    idx = np.argsort(t)
+    X = X[idx, :]
+    # X = np.roll(X, 1, axis=1)
+    # X = X[:, :2]
+    return X
 
 
 def trefoil_knot(n_samples=400):
