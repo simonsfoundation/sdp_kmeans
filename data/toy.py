@@ -1,5 +1,7 @@
 from __future__ import print_function, division, absolute_import
 import numpy as np
+from scipy.optimize import brentq
+from scipy.special import lambertw
 import sklearn.datasets as sk_datasets
 from sklearn.utils import check_random_state
 
@@ -64,13 +66,23 @@ def moons():
 
 def swiss_roll_2d(n_samples=100, noise=0.0, regular=True, random_state=None):
     if regular:
-        generator = check_random_state(random_state)
-        t = 1.5 * np.pi * (1 + 2 * np.linspace(0, 1, n_samples))
+        def reg_sampler():
+            def locations(k):
+                return np.sqrt(np.abs(0.5 * lambertw(0.5 * np.exp(2 * k - 1))))
+
+            k_min = brentq(lambda x: locations(x) - np.pi, 12, 13)
+            k_max = brentq(lambda x: locations(x) - 4 * np.pi, 161, 163)
+            t = locations(np.linspace(k_min, k_max, n_samples))
+            return t
+
+        # t = 1.5 * np.pi * (1 + 2 * np.linspace(0, 1, n_samples))
+        t = reg_sampler()
         t = t[np.newaxis, :]
         x = t * np.cos(t)
         y = t * np.sin(t)
 
         X = np.concatenate((x, y))
+        generator = check_random_state(random_state)
         X += noise * generator.randn(2, n_samples)
         X = X.T
         t = np.squeeze(t)
