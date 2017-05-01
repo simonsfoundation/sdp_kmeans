@@ -70,8 +70,13 @@ def swiss_roll_2d(n_samples=100, noise=0.0, regular=True, random_state=None):
             def locations(k):
                 return np.sqrt(np.abs(0.5 * lambertw(0.5 * np.exp(2 * k - 1))))
 
-            k_min = brentq(lambda x: locations(x) - np.pi, 12, 13)
-            k_max = brentq(lambda x: locations(x) - 4 * np.pi, 161, 163)
+            # Next lines find the root of an approximate inverse of the
+            # arc-length function.
+            # k_min = brentq(lambda x: locations(x) - np.pi, 12, 13)
+            # k_max = brentq(lambda x: locations(x) - 4 * np.pi, 161, 163)
+            # Since their values are fixed, I will hardcode them to:
+            k_min = 12.207481467498257
+            k_max = 161.63784184495893
             t = locations(np.linspace(k_min, k_max, n_samples))
             return t
 
