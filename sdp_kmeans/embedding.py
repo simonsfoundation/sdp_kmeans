@@ -1,27 +1,25 @@
 import numpy as np
 from numpy.linalg import eigh
-from sdp_kmeans.sdp import sdp_kmeans_multilayer
+from sdp_kmeans.sdp import sdp_kmeans
 
 
 def sdp_kmeans_embedding(X, n_clusters, target_dim, ret_sdp=False):
-    Ds = sdp_kmeans_multilayer(X, [n_clusters])
-
-    Ds = [Ds[0], Ds[-1]]
-    Y = spectral_embedding(Ds[-1], target_dim=target_dim, discard_first=True)
+    D, Q = sdp_kmeans(X, n_clusters)
+    Y = spectral_embedding(Q, target_dim=target_dim, discard_first=True)
     if ret_sdp:
-        return Y, Ds
+        return Y, D, Q
     else:
         return Y
 
 
-def spectral_embedding(mat, target_dim, discard_first=True):
+def spectral_embedding(mat, target_dim, gramian=True, discard_first=True):
     if discard_first:
         last = -1
         first = target_dim - last
     else:
         first = target_dim
         last = None
-    if mat.shape[0] != mat.shape[1]:
+    if not gramian:
         mat = mat.dot(mat.T)
     eigvals, eigvecs = eigh(mat)
 

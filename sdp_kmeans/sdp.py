@@ -7,23 +7,18 @@ from sdp_kmeans.nmf import symnmf_gram_admm
 from sdp_kmeans.utils import dot_matrix
 
 
-def sdp_kmeans_multilayer(X, layer_sizes, method='cvx'):
+def sdp_kmeans(X, n_clusters, method='cvx'):
     if method == 'cvx':
-        solver = sdp_kmeans_multilayer_cvx
+        D = dot_matrix(X)
+        Q = sdp_km(D, n_clusters)
     elif method == 'bm':
-        solver = sdp_kmeans_multilayer_bm
+        Y = sdp_km_burer_monteiro(X, n_clusters)
+        D = dot_matrix(X)
+        Q = Y.dot(Y.T)
     else:
         raise ValueError('The method should be one of "cvx" and "bm"')
 
-    return solver(X, layer_sizes)
-
-
-def sdp_kmeans_multilayer_cvx(X, layer_sizes):
-    Ds = [dot_matrix(X)]
-    for size in layer_sizes:
-        D_sdp = sdp_km(Ds[-1], size)
-        Ds.append(D_sdp)
-    return Ds
+    return D, Q
 
 
 def sdp_km(D, n_clusters):
@@ -37,15 +32,6 @@ def sdp_km(D, n_clusters):
     prob.solve(solver=cp.SCS)
 
     return np.asarray(Z.value)
-
-
-def sdp_kmeans_multilayer_bm(X, layer_sizes):
-    Ys = [X]
-    for size in layer_sizes:
-        Y = sdp_km_burer_monteiro(Ys[-1], size)
-        Ys.append(Y)
-    Ds = [Y.dot(Y.T) for Y in Ys]
-    return Ds
 
 
 def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):

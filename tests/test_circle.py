@@ -6,7 +6,7 @@ import numpy as np
 import os
 from scipy.linalg import dft
 import seaborn.apionly as sns
-from sdp_kmeans.sdp import sdp_kmeans_multilayer, dot_matrix
+from sdp_kmeans import sdp_kmeans, dot_matrix
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered
 
@@ -19,66 +19,73 @@ if not os.path.exists(dir_name):
 
 
 def test_circles():
-    layer_sizes = [16, 8, 4, 2]
+    n_clusters = 16
     filename = 'circles_eigendecomposition'
 
     X, gt = toy.circles()
-    Ds = sdp_kmeans_multilayer(X, layer_sizes)
+    D, Q = sdp_kmeans(X, n_clusters)
 
     sns.set_style('white')
     sns.set_color_codes()
 
-    plt.figure(figsize=(12, 4), tight_layout=True)
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1, len(layer_sizes)])
+    plt.figure(figsize=(12, 2))
+    gs = gridspec.GridSpec(2, 7, wspace=0.05, hspace=0.05,
+                           height_ratios=(0.45, 0.45))
 
-    gs_in = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[0],
-                                             wspace=0, hspace=0,
-                                             height_ratios=(0.5, 1, 0.5))
-    ax = plt.subplot(gs_in[1, :])
+    ax = plt.subplot(gs[:, 0])
     plot_data_clustered(X, gt, ax=ax)
 
-    ax = plt.subplot(gs[1])
-    ax.axis('off')
-    gs_in = gridspec.GridSpecFromSubplotSpec(3, len(Ds), subplot_spec=gs[1],
-                                             wspace=0.05, hspace=0.05,
-                                             height_ratios=(1.2, 0.4, 0.4))
+    titles = ['Input Gramian',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
+    for i, (M, t) in enumerate(zip([D, Q], titles)):
+        ax = plt.subplot(gs[:, 2 * i + 1])
+        plot_matrix(M, ax=ax)
+        ax.set_title(t, fontsize='x-large')
 
-    for i, D_input in enumerate(Ds):
-        ax = plt.subplot(gs_in[0, i])
-        plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian', fontsize='xx-large')
-        else:
-            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
-            ax.set_title(title, fontsize='xx-large')
-
-        eigvals, eigvecs = np.linalg.eigh(D_input)
-        mask = eigvals >= (layer_sizes[i-1] * 1e-2)
+        eigvals, eigvecs = np.linalg.eigh(M)
+        mask = eigvals >= 1e-2
         eigvecs = eigvecs[:, mask]
         Y = eigvecs.dot(np.diag(np.sqrt(eigvals[mask])))
         Y = Y[:, ::-1]
         eigvecs = eigvecs[:, ::-1]
 
         if i == 0:
-            ax = plt.subplot(gs_in[1:3, i])
+            ax = plt.subplot(gs[:, 2 * i + 2])
             ax.plot(Y[:, 0])
             ax.plot(Y[:, 1])
             ax.set_yticks([])
             ax.set_xticks([])
+            ax.set_aspect(100)
+
         else:
             s1 = np.sum(np.abs(eigvecs[:100, :]), axis=0)
             s2 = np.sum(np.abs(eigvecs[100:, :]), axis=0)
 
-            ax = plt.subplot(gs_in[1, i])
+            ax = plt.subplot(gs[0, 2 * i + 2])
             for idx in np.where(s1 > s2)[0]:
                 ax.plot(Y[:, idx])
             ax.set_yticks([])
             ax.set_xticks([])
-            ax = plt.subplot(gs_in[2, i])
+            ax.set_aspect(352, anchor='S')
+            ax = plt.subplot(gs[1, 2 * i + 2])
             for idx in np.where(s1 < s2)[0]:
                 ax.plot(Y[:, idx])
             ax.set_yticks([])
             ax.set_xticks([])
+            ax.set_aspect(352, anchor='N')
+
+            ax = plt.subplot(gs[0, 5])
+            for idx in np.where(s1 > s2)[0][:3]:
+                ax.plot(Y[:, idx])
+            ax.set_yticks([])
+            ax.set_xticks([])
+            ax.set_aspect(352, anchor='S')
+            ax = plt.subplot(gs[1, 5])
+            for idx in np.where(s1 < s2)[0][:3]:
+                ax.plot(Y[:, idx])
+            ax.set_yticks([])
+            ax.set_xticks([])
+            ax.set_aspect(352, anchor='N')
 
     plt.savefig('{}{}.pdf'.format(dir_name, filename))
 
@@ -91,7 +98,7 @@ def test_one_circle():
     k_range = np.arange(1, len(X) + 1)
     solutions = []
     for k in k_range:
-        Ds = sdp_kmeans_multilayer(X, [k])
+        Ds = sdp_kmeans(X, k)
         solutions.append(Ds[-1])
 
     sns.set_style('white')
@@ -196,7 +203,7 @@ def test_circle_sdp_lp():
     X = X[gt == 0, :]
 
     k = 16
-    D_sdp = sdp_kmeans_multilayer(X, [k])[1]
+    D_sdp = sdp_kmeans(X, k)[1]
     D_lp, q = circle_lp(X, 16)
 
     eigvals, _ = np.linalg.eigh(D_sdp)
@@ -205,24 +212,36 @@ def test_circle_sdp_lp():
     sns.set_style('white')
     sns.set_color_codes()
 
-    plt.figure(figsize=(8, 8), tight_layout=True)
-    ax = plt.subplot(221)
+    plt.figure(figsize=(8, 4.5))
+    plt.suptitle('SDP solution', fontsize='xx-large')
+    gs = gridspec.GridSpec(1, 2, wspace=0.1, width_ratios=[1.4, 1])
+
+    ax = plt.subplot(gs[:, 0])
     plot_matrix(D_sdp, ax=ax)
-    plt.title('SDP solution', fontdict=dict(size='xx-large'))
-    ax = plt.subplot(222)
-    plt.title('LP solution', fontdict=dict(size='xx-large'))
+    # plt.title('SDP solution', fontdict=dict(size='xx-large'))
+
+    plt.subplot(gs[:, 1])
+    plt.plot(eigvals, linewidth=3)
+    plt.xlim(0, len(eigvals))
+    plt.ylim(0, 1)
+    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
+
+    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp1'))
+
+    plt.figure(figsize=(8, 4.5))
+    plt.suptitle('LP solution', fontsize='xx-large')
+    gs = gridspec.GridSpec(1, 2, wspace=0.1, width_ratios=[1.4, 1])
+
+    ax = plt.subplot(gs[:, 0])
     plot_matrix(D_lp, ax=ax)
 
-    plt.subplot(223)
-    plt.plot(eigvals, linewidth=3)
-    plt.ylim(0, 1)
-    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
-    plt.subplot(224)
+    plt.subplot(gs[:, 1])
     plt.plot(q, linewidth=3)
+    plt.xlim(0, len(eigvals))
     plt.ylim(0, 1)
     plt.xlabel('sorted eigenvalues', fontsize='xx-large')
 
-    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp'))
+    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp2'))
 
     print(np.linalg.norm(eigvals - q) / np.linalg.norm(eigvals))
     print(np.linalg.norm(D_sdp - D_lp, 'fro') / np.linalg.norm(D_sdp, 'fro'))

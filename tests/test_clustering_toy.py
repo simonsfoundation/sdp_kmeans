@@ -1,9 +1,10 @@
 from __future__ import absolute_import, print_function
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 import seaborn.apionly as sns
-from sdp_kmeans.sdp import sdp_kmeans_multilayer
+from sdp_kmeans import connected_components, sdp_kmeans
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered
 
@@ -15,13 +16,13 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def test_multilayer(X, gt, layer_sizes, filename,
-                    figsize=(12, 5.5)):
-    Ds = sdp_kmeans_multilayer(X, layer_sizes, method='bm')
+def test_multilayer(X, gt, n_clusters, filename):
+    D, Q = sdp_kmeans(X, [n_clusters])
+    Q_labels, _ = connected_components(Q)
 
     sns.set_style('white')
-    plt.figure(figsize=figsize, tight_layout=True)
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1, len(layer_sizes)])
+    plt.figure(figsize=(12, 6), tight_layout=True)
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1, 3])
 
     gs_in = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[0],
                                              wspace=0, hspace=0,
@@ -29,22 +30,18 @@ def test_multilayer(X, gt, layer_sizes, filename,
     ax = plt.subplot(gs_in[1, :])
     plot_data_clustered(X, gt, ax=ax)
 
-    ax = plt.subplot(gs[1])
-    ax.axis('off')
-    gs_in = gridspec.GridSpecFromSubplotSpec(2, len(Ds), subplot_spec=gs[1],
+    gs_in = gridspec.GridSpecFromSubplotSpec(2, 3, subplot_spec=gs[1],
                                              wspace=.05, hspace=0)
 
-    for i, D_input in enumerate(Ds):
-        reps = D_input.dot(X)
+    titles = ['Input Gramian',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
+              'Connected components']
+    for i, (M, t) in enumerate(zip([D, Q, Q_labels], titles)):
+        reps = M.dot(X)
 
         ax = plt.subplot(gs_in[0, i])
-        plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian',
-                         fontsize='xx-large')
-        else:
-            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
-            ax.set_title(title, fontsize='xx-large')
+        plot_matrix(M, ax=ax)
+        ax.set_title(t, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         plot_data_clustered(reps, gt, marker='x', ax=ax)
@@ -54,16 +51,15 @@ def test_multilayer(X, gt, layer_sizes, filename,
 
 if __name__ == '__main__':
     X, gt = toy.gaussian_blobs()
-    test_multilayer(X, gt, [16, 8, 6], 'gaussian_blobs')
+    test_multilayer(X, gt, 16, 'gaussian_blobs')
 
     X, gt = toy.circles()
-    test_multilayer(X, gt, [16, 8, 4, 2], 'circles', figsize=(12, 4.2))
+    test_multilayer(X, gt, 16, 'circles')
 
     X, gt = toy.moons()
-    test_multilayer(X, gt, [16, 8, 4, 2], 'moons', figsize=(12, 4.2))
+    test_multilayer(X, gt, 16, 'moons')
 
     X, gt = toy.double_swiss_roll()
-    test_multilayer(X, gt, [64, 32, 16, 8, 4, 2], 'double_swiss_roll',
-                    figsize=(16, 4.3))
+    test_multilayer(X, gt, 64, 'double_swiss_roll')
 
     plt.show()

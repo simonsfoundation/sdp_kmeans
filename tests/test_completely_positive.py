@@ -6,8 +6,7 @@ import os
 import scipy.io
 from scipy.stats import circmean
 import seaborn as sns
-from sdp_kmeans.nmf import symnmf_admm
-from sdp_kmeans.sdp import sdp_kmeans_multilayer
+from sdp_kmeans import sdp_kmeans, symnmf_admm
 from data import real, toy
 from tests.utils import plot_matrix, plot_data_clustered
 
@@ -20,8 +19,8 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def test_reconstruction(X, gt, layer_size, filename, from_file=False):
-    Ds = sdp_kmeans_multilayer(X, [layer_size], method='cvx')
+def test_reconstruction(X, gt, n_clusters, filename, from_file=False):
+    Ds = sdp_kmeans(X, n_clusters, method='cvx')
 
     if from_file:
         data = scipy.io.loadmat('{}{}.mat'.format(dir_name, filename))
@@ -56,7 +55,7 @@ def test_reconstruction(X, gt, layer_size, filename, from_file=False):
         if i == 0:
             ax.set_title('Original Gramian')
         else:
-            ax.set_title('Layer {} (k={})'.format(i, layer_size))
+            ax.set_title('Layer {} (k={})'.format(i, n_clusters))
     plt.savefig('{}{}_solution.pdf'.format(dir_name, filename))
 
     plt.figure(tight_layout=True)
@@ -66,7 +65,7 @@ def test_reconstruction(X, gt, layer_size, filename, from_file=False):
     plt.fill_between(np.squeeze(k_values), mean - 2 * std, mean + 2 * std,
                      alpha=0.3)
     plt.semilogy(np.squeeze(k_values), mean, linewidth=2)
-    plt.semilogy([layer_size, layer_size], [mean.min(), mean.max()],
+    plt.semilogy([n_clusters, n_clusters], [mean.min(), mean.max()],
                  linestyle='--', linewidth=2)
     plt.xlabel('$r$', size='xx-large')
     plt.ylabel('Relative reconstruction error', size='xx-large')
@@ -76,7 +75,7 @@ def test_reconstruction(X, gt, layer_size, filename, from_file=False):
 
 def test__circles_visualization(ranks):
     X, gt = toy.circles()
-    Ds = sdp_kmeans_multilayer(X, [16])
+    Ds = sdp_kmeans(X, 16)
 
     def get_y(rank):
         np.random.seed(0)
@@ -117,8 +116,8 @@ def check_completely_positivity(sym_mat, Y):
     return error
 
 
-def test_burer_monteiro(X, ranks, filename):
-    Qs = sdp_kmeans_multilayer(X, [ranks[0]])
+def test_burer_monteiro(X, n_clusters, ranks, filename):
+    Qs = sdp_kmeans(X, n_clusters)
 
     plt.figure(figsize=(16, 4), tight_layout=True)
     plt.subplot(1, len(ranks) + 1, 1)
@@ -126,7 +125,7 @@ def test_burer_monteiro(X, ranks, filename):
     plt.title(r'$\mathbf{{Q}}_*$', fontsize='x-large')
 
     for i, r in enumerate(ranks):
-        Y = sdp_kmeans_multilayer(X, ranks[0], rank=r, method='cvx')
+        Y = sdp_kmeans(X, n_clusters, rank=r, method='cvx')
         Q_nc = Y.dot(Y.T)
         err = np.linalg.norm(Qs[1] - Q_nc, 'fro') / np.linalg.norm(Qs[1], 'fro')
 
@@ -142,10 +141,10 @@ def test_burer_monteiro(X, ranks, filename):
 
 if __name__ == '__main__':
     X, gt = toy.circles()
-    test_reconstruction(X, gt, 16, 'circles', from_file=True)
+    test_reconstruction(X, gt, 16, 'circles', from_file=False)
 
     X, gt = toy.double_swiss_roll()
-    test_reconstruction(X, gt, 64, 'double-swiss-roll', from_file=True)
+    test_reconstruction(X, gt, 64, 'double-swiss-roll', from_file=False)
 
     X, gt = toy.circles()
     X = X[gt == 0]
@@ -156,9 +155,9 @@ if __name__ == '__main__':
 
     X, _ = toy.circles()
     X = X[:100, :]
-    test_burer_monteiro(X, [8, 16, 32, 64, 128, 256], 'circles')
+    test_burer_monteiro(X, 8, [8, 16, 32, 64, 128, 256], 'circles')
 
     X = real.teapot()
-    test_burer_monteiro(X, [20, 40, 60, 80, 100, 120], 'teapot')
+    test_burer_monteiro(X, 20, [20, 40, 60, 80, 100, 120], 'teapot')
 
     plt.show()

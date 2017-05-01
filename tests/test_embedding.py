@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os
 import seaborn.apionly as sns
-from sdp_kmeans.embedding import sdp_kmeans_embedding
+from sdp_kmeans import sdp_kmeans_embedding
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_embedded, plot_images_embedded
 
@@ -20,8 +20,8 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
                        elev_azim=None):
     print('--------\n', filename)
 
-    embedding, Ds = sdp_kmeans_embedding(X, n_clusters, target_dim,
-                                         ret_sdp=True)
+    embedding, D, Q = sdp_kmeans_embedding(X, n_clusters, target_dim,
+                                           ret_sdp=True)
 
     sns.set_style('whitegrid')
     plt.figure(figsize=(16, 4), tight_layout=True)
@@ -34,16 +34,17 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
         ax = plt.subplot(gs[0], projection='3d')
     plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
 
-    for i, D_input in enumerate(Ds):
+    titles = ['Input Gramian $\mathbf{{D}}$',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
+    for i, (M, t) in enumerate(zip([D, Q], titles)):
         ax = plt.subplot(gs[i+1])
-        plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian $\mathbf{{D}}$', fontsize='xx-large')
-        else:
-            title = '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)
-            ax.set_title(title, fontsize='xx-large')
+        plot_matrix(M, ax=ax)
+        ax.set_title(t, fontsize='xx-large')
 
-    ax = plt.subplot(gs[3])
+    if target_dim == 2:
+        ax = plt.subplot(gs[3])
+    if target_dim == 3:
+        ax = plt.subplot(gs[3], projection='3d')
     plot_data_embedded(embedding, ax=ax, palette=palette)
 
     plt.savefig('{}{}.pdf'.format(dir_name, filename))
@@ -53,22 +54,19 @@ def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
                         subsampling=10, zoom=.5, labels=None, palette='hls'):
     print('--------\n', filename)
 
-    embedding, Ds = sdp_kmeans_embedding(X, n_clusters, target_dim,
-                                         ret_sdp=True)
+    embedding, D, Q = sdp_kmeans_embedding(X, n_clusters, target_dim,
+                                           ret_sdp=True)
 
     sns.set_style('whitegrid')
     plt.figure(figsize=(12, 4), tight_layout=True)
     gs = gridspec.GridSpec(1, 3, wspace=0.)
 
-    for i, D_input in enumerate(Ds):
-
+    titles = ['Input Gramian $\mathbf{{D}}$',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
+    for i, (M, t) in enumerate(zip([D, Q], titles)):
         ax = plt.subplot(gs[i])
-        plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian', fontsize='xx-large')
-        else:
-            title = '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)
-            ax.set_title(title, fontsize='xx-large')
+        plot_matrix(M, ax=ax)
+        ax.set_title(t, fontsize='xx-large')
 
     ax = plt.subplot(gs[2])
     plot_images_embedded(embedding, img_getter, labels=labels,
@@ -85,14 +83,14 @@ def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
 
 
 def test_swiss_roll():
-    X = toy.swiss_roll_3d(n_samples=1000)
+    X = toy.swiss_roll_3d(n_samples=200)
     test_toy_embedding(X, 32, 2, 'swiss_roll_3d', palette='Spectral',
                        elev_azim=(7, -80))
 
 
 def test_trefoil():
     X = toy.trefoil_knot(n_samples=200)
-    test_toy_embedding(X, 16, 2, 'trefoil_knot')
+    test_toy_embedding(X, 16, 3, 'trefoil_knot')
 
 
 def test_teapot():
@@ -136,6 +134,5 @@ if __name__ == '__main__':
     test_yale_faces(subjects=[1, 4, 5])
     test_yale_faces(subjects=[1, 4, 37])
     test_yale_faces(subjects=[1, 4, 5, 27])
-    test_swiss_roll()
 
     plt.show()

@@ -88,6 +88,8 @@ def plot_data_clustered(X, gt, marker='o', ax=None):
                    marker=marker)
 
     ax.set_aspect('equal')
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
 
     X_max = X.max(axis=0)
     X_min = X.min(axis=0)
@@ -95,12 +97,6 @@ def plot_data_clustered(X, gt, marker='o', ax=None):
     center = (X_max + X_min) / 2.
     ax.set_xlim(xmin=center[0] - range, xmax=center[0] + range)
     ax.set_ylim(ymin=center[1] - range, ymax=center[1] + range)
-
-    ax.tick_params(axis='both',
-                   which='both',
-                   bottom='off', top='off',
-                   left='off', right='off',
-                   labelbottom='off', labelleft='off')
 
 
 def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
@@ -122,14 +118,10 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
                    marker=marker)
 
         ax.set_aspect('equal')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
         ax.set_xlim(xmin=center[0] - range, xmax=center[0] + range)
         ax.set_ylim(ymin=center[1] - range, ymax=center[1] + range)
-
-        ax.tick_params(axis='both',
-                       which='both',
-                       bottom='off', top='off',
-                       left='off', right='off',
-                       labelbottom='off', labelleft='off')
 
     elif X.shape[1] == 3:
         if elev_azim is not None:
@@ -142,11 +134,8 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
         ax.set_ylim(center[1] - range, center[1] + range)
         ax.set_zlim(center[2] - range, center[2] + range)
         ax.set_aspect('equal')
-        ax.tick_params(axis='both',
-                       which='both',
-                       bottom='off', top='off',
-                       left='off', right='off',
-                       labelbottom='off', labelleft='off')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
     else:
         raise RuntimeError('Can only plot 2d or 3d data.')
 

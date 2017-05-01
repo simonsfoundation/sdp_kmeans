@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import seaborn.apionly as sns
-import sklearn.cluster as sk_cluster
-from sdp_kmeans.embedding import spectral_embedding
-from sdp_kmeans.sdp import sdp_kmeans_multilayer
+from sdp_kmeans import connected_components, sdp_kmeans, spectral_embedding
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_clustered, plot_data_embedded,\
     plot_images_embedded
@@ -20,40 +18,28 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def joint_clustering_embedding(X, layer_sizes, target_dim):
-    Ds = sdp_kmeans_multilayer(X, layer_sizes)
-
-    n_clusters = layer_sizes[-1]
-    model = sk_cluster.KMeans(n_clusters=n_clusters, random_state=0)
-    labels = model.fit_predict(Ds[-1].dot(X))
+def clustering_embedding(X, n_clusters, target_dim):
+    D, Q = sdp_kmeans(X, n_clusters)
+    Q_labels, clusters = connected_components(Q)
 
     embeddings = {}
-    clusters = {}
-    for k in range(n_clusters):
-        mask = labels == k
-        D_crop = Ds[1][mask, :][:, mask]
+    for k, mask in enumerate(clusters):
+        D_crop = Q[mask, :][:, mask]
         embeddings[k] = spectral_embedding(D_crop, target_dim=target_dim)
-        clusters[k] = mask
 
-    return Ds, embeddings, clusters
+    return D, Q, Q_labels, embeddings, clusters
 
 
-def test_thin_lines(layer_sizes, target_dim):
+def test_thin_lines(n_clusters, target_dim):
     X, gt = toy.thin_lines(n_samples=200)
     filename = 'thin_lines'
 
-    Ds, embeddings, clusters = joint_clustering_embedding(X, layer_sizes,
-                                                          target_dim)
-    n_clusters = layer_sizes[-1]
-
-    if len(layer_sizes) > 1:
-        figsize = (16, 6)
-    else:
-        figsize = None
+    D, Q, Q_labels, embeddings, clusters = clustering_embedding(X, n_clusters,
+                                                                target_dim)
 
     sns.set_style('white')
-    plt.figure(figsize=figsize, tight_layout=True)
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1, len(layer_sizes)])
+    plt.figure(figsize=(10, 5.2), tight_layout=True)
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1, 3])
 
     gs_in = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[0],
                                              wspace=0, hspace=0,
@@ -67,21 +53,18 @@ def test_thin_lines(layer_sizes, target_dim):
 
     ax = plt.subplot(gs[1])
     ax.axis('off')
-    gs_in = gridspec.GridSpecFromSubplotSpec(2, len(Ds), subplot_spec=gs[1],
-                                             hspace=0.1,
-                                             height_ratios=(1, 1))
+    gs_in = gridspec.GridSpecFromSubplotSpec(2, 3, subplot_spec=gs[1],
+                                             wspace=0.05, hspace=0.05)
 
-    for i, D_input in enumerate(Ds):
+    titles = ['Input Gramian',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
+              'Connected components']
+    for i, (D_input, t) in enumerate(zip([D, Q, Q_labels], titles)):
         reps = D_input.dot(X)
 
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian',
-                         fontsize='xx-large')
-        else:
-            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
-            ax.set_title(title, fontsize='xx-large')
+        ax.set_title(t, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         if X.shape[1] == 2:
@@ -90,46 +73,39 @@ def test_thin_lines(layer_sizes, target_dim):
             reps_emb = spectral_embedding(reps, target_dim=2)
             plot_data_clustered(reps_emb, gt, ax=ax)
 
-    str_layer_sizes = '-'.join([str(ls) for ls in layer_sizes])
     plt.savefig('{}{}_solution_{}.pdf'.format(dir_name, filename,
-                                              str_layer_sizes))
+                                              n_clusters))
 
     if X.shape[1] == 2:
-        reps = Ds[1].dot(X)
+        reps = Q.dot(X)
     else:
-        reps = spectral_embedding(Ds[1].dot(X), target_dim=2)
+        reps = spectral_embedding(Q.dot(X), target_dim=2)
 
     plt.figure()
-    for k in range(n_clusters):
+    for k in range(len(clusters)):
         emb = embeddings[k]
         mask = clusters[k]
         if target_dim == 1:
             emb = np.hstack((emb, np.zeros_like(emb)))
             emb *= 3
             emb += np.mean(reps[mask, :], axis=0)
-        plot_data_embedded(emb)
+        plot_data_embedded(emb, palette='Spectral')
     plt.axis('equal')
 
     plt.savefig('{}{}_embedding_{}.pdf'.format(dir_name, filename,
-                                               str_layer_sizes))
+                                               n_clusters))
 
 
-def test_turntable(layer_sizes, target_dim):
+def test_turntable(n_clusters, target_dim):
     X, gt = real.turntable(objects=['Horse', 'Lamp'])
     filename = 'turntable'
 
-    Ds, embeddings, clusters = joint_clustering_embedding(X, layer_sizes,
-                                                          target_dim)
-    n_clusters = layer_sizes[-1]
-
-    if len(layer_sizes) > 1:
-        figsize = (16, 5)
-    else:
-        figsize = None
+    D, Q, Q_labels, embeddings, clusters = clustering_embedding(X, n_clusters,
+                                                                target_dim)
 
     sns.set_style('white')
-    plt.figure(figsize=figsize, tight_layout=True)
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1, len(layer_sizes)])
+    plt.figure(figsize=(10, 5.2), tight_layout=True)
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1, 3])
 
     gs_in = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[0],
                                              wspace=0, hspace=0,
@@ -143,21 +119,18 @@ def test_turntable(layer_sizes, target_dim):
 
     ax = plt.subplot(gs[1])
     ax.axis('off')
-    gs_in = gridspec.GridSpecFromSubplotSpec(2, len(Ds), subplot_spec=gs[1],
-                                             hspace=0.1,
-                                             height_ratios=(1, 1))
+    gs_in = gridspec.GridSpecFromSubplotSpec(2, 3, subplot_spec=gs[1],
+                                             wspace=0.05, hspace=0.05)
 
-    for i, D_input in enumerate(Ds):
+    titles = ['Input Gramian',
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
+              'Connected components']
+    for i, (D_input, t) in enumerate(zip([D, Q, Q_labels], titles)):
         reps = D_input.dot(X)
 
         ax = plt.subplot(gs_in[0, i])
         plot_matrix(D_input, ax=ax)
-        if i == 0:
-            ax.set_title('Input Gramian',
-                         fontsize='xx-large')
-        else:
-            title = 'L{0}: $\mathbf{{Q}}$ ($K={1}$)'.format(i, layer_sizes[i-1])
-            ax.set_title(title, fontsize='xx-large')
+        ax.set_title(t, fontsize='xx-large')
 
         ax = plt.subplot(gs_in[1, i])
         if X.shape[1] == 2:
@@ -166,11 +139,10 @@ def test_turntable(layer_sizes, target_dim):
             reps_emb = spectral_embedding(reps, target_dim=2)
             plot_data_clustered(reps_emb, gt, ax=ax)
 
-    str_layer_sizes = '-'.join([str(ls) for ls in layer_sizes])
     plt.savefig('{}{}_solution_{}.pdf'.format(dir_name, filename,
-                                              str_layer_sizes))
+                                              n_clusters))
 
-    for k in range(n_clusters):
+    for k in range(len(clusters)):
         emb = embeddings[k]
         mask = clusters[k]
         X_mask = X[mask, :]
@@ -182,11 +154,11 @@ def test_turntable(layer_sizes, target_dim):
         plot_images_embedded(emb, turnable_img, subsampling=5, zoom=0.07)
 
         str_format = '{}{}_embedding_{}_cluster{}.pdf'
-        plt.savefig(str_format.format(dir_name, filename, str_layer_sizes, k))
+        plt.savefig(str_format.format(dir_name, filename, n_clusters, k))
 
 
 if __name__ == '__main__':
-    test_thin_lines([32, 16, 8, 6], 1)
-    test_turntable([32, 16, 8, 4, 2], 2)
+    test_thin_lines(32, 1)
+    test_turntable(35, 2)
 
     plt.show()
