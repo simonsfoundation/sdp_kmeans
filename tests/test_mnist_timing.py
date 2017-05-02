@@ -40,7 +40,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
             except ValueError:
                 break
 
-            if n_samples < 1000:
+            if n_samples <= 1000:
                 t = timeit.default_timer()
                 Q_sdp = sdp_kmeans(X, k, method='cvx')
                 t = timeit.default_timer() - t
@@ -54,7 +54,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
                 t = timeit.default_timer() - t
                 time_sdp_bm[rf][n_samples] = t
                 Q_bm = Y.dot(Y.T)
-                if n_samples < 1000:
+                if n_samples <= 1000:
                     rel_err = (np.linalg.norm(Q_sdp[-1] - Q_bm, 'fro')
                                / np.linalg.norm(Q_sdp[-1], 'fro'))
                     rel_err_sdp_bm[rf][n_samples] = rel_err
