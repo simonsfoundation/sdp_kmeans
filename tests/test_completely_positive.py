@@ -30,7 +30,7 @@ def test_reconstruction(X, gt, n_clusters, filename, from_file=False):
         k_values = np.arange(200 + len(X)) + 1
         rec_errors = []
         for k in k_values:
-            print(k)
+            print('{} / {}'.format(k, k_values[-1]))
             rec_errors_k = []
             for trials in range(50):
                 Y = symnmf_admm(Ds[-1], k=k)

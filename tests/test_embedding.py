@@ -24,28 +24,29 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
                                            ret_sdp=True)
 
     sns.set_style('whitegrid')
-    plt.figure(figsize=(16, 4), tight_layout=True)
-    gs = gridspec.GridSpec(1, 4, width_ratios=(1.5, 1, 1, 1),
-                           wspace=0.1)
-
-    if X.shape[1] == 2:
-        ax = plt.subplot(gs[0])
-    if X.shape[1] == 3:
-        ax = plt.subplot(gs[0], projection='3d')
-    plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
+    plt.figure(figsize=(6, 6), tight_layout=True)
+    gs = gridspec.GridSpec(2, 2, width_ratios=(1, 1.5), wspace=0.05, hspace=0.3)
 
     titles = ['Input Gramian $\mathbf{{D}}$',
               '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
     for i, (M, t) in enumerate(zip([D, Q], titles)):
-        ax = plt.subplot(gs[i+1])
+        ax = plt.subplot(gs[i, 0])
         plot_matrix(M, ax=ax)
         ax.set_title(t, fontsize='xx-large')
 
+    if X.shape[1] == 2:
+        ax = plt.subplot(gs[0, 1])
+    if X.shape[1] == 3:
+        ax = plt.subplot(gs[0, 1], projection='3d')
+    plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
+    ax.set_title('Original dataset', fontsize='xx-large')
+
     if target_dim == 2:
-        ax = plt.subplot(gs[3])
+        ax = plt.subplot(gs[1, 1])
     if target_dim == 3:
-        ax = plt.subplot(gs[3], projection='3d')
+        ax = plt.subplot(gs[1, 1], projection='3d')
     plot_data_embedded(embedding, ax=ax, palette=palette)
+    ax.set_title('Computed 2D embedding', fontsize='xx-large')
 
     plt.savefig('{}{}.pdf'.format(dir_name, filename))
 
@@ -90,7 +91,7 @@ def test_swiss_roll():
 
 def test_trefoil():
     X = toy.trefoil_knot(n_samples=200)
-    test_toy_embedding(X, 16, 3, 'trefoil_knot')
+    test_toy_embedding(X, 16, 2, 'trefoil_knot')
 
 
 def test_teapot():
