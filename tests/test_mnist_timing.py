@@ -95,7 +95,9 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
     plt.xlabel('Dataset size ($n$)', fontsize='x-large')
     plt.ylabel('Time (s)', fontsize='x-large')
-    plt.xlim(min(n_samples_range_active) - 3, max(n_samples_range_active) + 300)
+    plt.xlim(min(n_samples_range_active) - 3, max(n_samples_range))
+    plt.ylim(1e-2, 1e4)
+    plt.yticks(10. ** np.arange(-1, 5))
     plt.legend(loc='lower right', fontsize='x-large')
     plt.savefig('{}mnist_sdp_bm_timing.pdf'.format(dir_name))
 
@@ -109,7 +111,7 @@ if __name__ == '__main__':
     n_samples_range += list(range(2000, 10001, 1000))
 
     test_mnist(16, n_samples_range, rank_factors=[4, 8], digit=1,
-               from_file=False)
+               from_file=True)
 
     plt.show()
 
