@@ -7,7 +7,7 @@ import timeit
 import seaborn.apionly as sns
 import sys
 from data import real
-from sdp_kmeans.sdp import sdp_kmeans, sdp_km_burer_monteiro
+from sdp_kmeans import sdp_kmeans, sdp_km_burer_monteiro
 from tests.utils import Logger
 
 
