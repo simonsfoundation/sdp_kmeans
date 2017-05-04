@@ -6,7 +6,7 @@ import os
 import scipy.io
 from scipy.stats import circmean
 import seaborn as sns
-from sdp_kmeans import sdp_kmeans, symnmf_admm
+from sdp_kmeans import sdp_kmeans, symnmf_admm, sdp_km_burer_monteiro
 from data import real, toy
 from tests.utils import plot_matrix, plot_data_clustered
 
@@ -126,6 +126,7 @@ def test_burer_monteiro(X, n_clusters, ranks, filename):
 
     for i, r in enumerate(ranks):
         Y = sdp_kmeans(X, n_clusters, rank=r, method='cvx')
+        Y = sdp_km_burer_monteiro(X, n_clusters, rank=r)
         Q_nc = Y.dot(Y.T)
         err = np.linalg.norm(Qs[1] - Q_nc, 'fro') / np.linalg.norm(Qs[1], 'fro')
 
