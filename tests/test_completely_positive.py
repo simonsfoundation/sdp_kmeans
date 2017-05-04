@@ -125,7 +125,6 @@ def test_burer_monteiro(X, n_clusters, ranks, filename):
     plt.title(r'$\mathbf{{Q}}_*$', fontsize='x-large')
 
     for i, r in enumerate(ranks):
-        Y = sdp_kmeans(X, n_clusters, rank=r, method='cvx')
         Y = sdp_km_burer_monteiro(X, n_clusters, rank=r)
         Q_nc = Y.dot(Y.T)
         err = np.linalg.norm(Qs[1] - Q_nc, 'fro') / np.linalg.norm(Qs[1], 'fro')
