@@ -212,36 +212,35 @@ def test_circle_sdp_lp():
     sns.set_style('white')
     sns.set_color_codes()
 
-    plt.figure(figsize=(8, 4.5))
-    plt.suptitle('SDP solution', fontsize='xx-large')
-    gs = gridspec.GridSpec(1, 2, wspace=0.1, width_ratios=[1.4, 1])
+    plt.figure()
+    plot_matrix(D_sdp)
+    plt.title('SDP solution', fontsize='xx-large')
+    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp'))
 
-    ax = plt.subplot(gs[:, 0])
-    plot_matrix(D_sdp, ax=ax)
-    # plt.title('SDP solution', fontdict=dict(size='xx-large'))
-
-    plt.subplot(gs[:, 1])
-    plt.plot(eigvals, linewidth=3)
-    plt.xlim(0, len(eigvals))
-    plt.ylim(0, 1)
-    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
-
-    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp1'))
+    plt.figure()
+    plot_matrix(D_lp)
+    plt.title('LP solution', fontsize='xx-large')
+    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_lp'))
 
     plt.figure(figsize=(8, 4.5))
-    plt.suptitle('LP solution', fontsize='xx-large')
-    gs = gridspec.GridSpec(1, 2, wspace=0.1, width_ratios=[1.4, 1])
+    gs = gridspec.GridSpec(1, 2, wspace=0.3)
 
-    ax = plt.subplot(gs[:, 0])
-    plot_matrix(D_lp, ax=ax)
-
-    plt.subplot(gs[:, 1])
-    plt.plot(q, linewidth=3)
+    plt.subplot(gs[0])
+    plt.plot(eigvals, linewidth=3, label='SDP')
+    plt.plot(q, linewidth=3, label='LP')
     plt.xlim(0, len(eigvals))
     plt.ylim(0, 1)
-    plt.xlabel('sorted eigenvalues', fontsize='xx-large')
+    plt.xlabel('Eigenvalues', fontsize='xx-large')
+    plt.legend()
 
-    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp2'))
+    plt.subplot(gs[1])
+    plt.plot(np.zeros_like(eigvals), color='#636363', linewidth=1)
+    plt.plot(eigvals - q, color='#4daf4a', linewidth=3)
+    plt.xlim(0, len(eigvals))
+    plt.xlabel('Eigenvalue differences', fontsize='xx-large')
+    plt.legend()
+
+    plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp'))
 
     print(np.linalg.norm(eigvals - q) / np.linalg.norm(eigvals))
     print(np.linalg.norm(D_sdp - D_lp, 'fro') / np.linalg.norm(D_sdp, 'fro'))
