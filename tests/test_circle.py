@@ -222,23 +222,25 @@ def test_circle_sdp_lp():
     plt.title('LP solution', fontsize='xx-large')
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_lp'))
 
-    plt.figure(figsize=(8, 4.5))
+    plt.figure(figsize=(8, 3))
     gs = gridspec.GridSpec(1, 2, wspace=0.3)
 
-    plt.subplot(gs[0])
+    ax = plt.subplot(gs[0])
     plt.plot(eigvals, linewidth=3, label='SDP')
     plt.plot(q, linewidth=3, label='LP')
     plt.xlim(0, len(eigvals))
     plt.ylim(0, 1)
     plt.xlabel('Eigenvalues', fontsize='xx-large')
     plt.legend()
+    ax.set_aspect(80, anchor='N')
 
-    plt.subplot(gs[1])
+    ax = plt.subplot(gs[1])
     plt.plot(np.zeros_like(eigvals), color='#636363', linewidth=1)
     plt.plot(eigvals - q, color='#4daf4a', linewidth=3)
     plt.xlim(0, len(eigvals))
     plt.xlabel('Eigenvalue differences', fontsize='xx-large')
     plt.legend()
+    ax.set_aspect(24350, anchor='N')
 
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp'))
 
