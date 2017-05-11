@@ -51,6 +51,10 @@ def distances2gramian():
     plt.plot([0, len(x)], [np.sqrt(2)] * 2, 'k:')
 
     plt.stem(np.arange(0, len(dists), 10), dists[::10], basefmt='none')
+    plot_info = plt.stem([center], [dists[center]], basefmt='none')
+    plt.setp(plot_info.stemlines, 'color', '#e41a1c')
+    plt.setp(plot_info.markerline, 'color', '#e41a1c', 'markerfacecolor', '#e41a1c')
+
     for i, d in enumerate(dists[::10]):
         ax.annotate('{}'.format(i), xy=(0, 0), xytext=(i * 10, d + 0.07),
                     horizontalalignment='center', verticalalignment='center')
@@ -74,6 +78,10 @@ def distances2gramian():
     plt.plot([0, len(x)], [0, 0], 'k')
 
     plt.stem(np.arange(0, len(xtx_center), 10), xtx_center[::10], basefmt='none')
+    plot_info = plt.stem([center], [xtx_center[center]], basefmt='none')
+    plt.setp(plot_info.stemlines, 'color', '#e41a1c')
+    plt.setp(plot_info.markerline, 'color', '#e41a1c', 'markerfacecolor', '#e41a1c')
+
     plt.xticks(np.arange(0, len(xtx_center), 10), np.arange(len(dists[::10])))
 
     for i, d in enumerate(xtx_center[::10]):
