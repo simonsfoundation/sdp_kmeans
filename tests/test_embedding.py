@@ -24,27 +24,27 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
                                            ret_sdp=True)
 
     sns.set_style('whitegrid')
-    plt.figure(figsize=(6, 6), tight_layout=True)
-    gs = gridspec.GridSpec(2, 2, width_ratios=(1, 1.5), wspace=0.05, hspace=0.3)
+    plt.figure(figsize=(12, 6), tight_layout=True)
+    gs = gridspec.GridSpec(1, 4, width_ratios=(1, 1, 1, 1))
+
+    if X.shape[1] == 2:
+        ax = plt.subplot(gs[0])
+    if X.shape[1] == 3:
+        ax = plt.subplot(gs[0], projection='3d')
+    plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
+    ax.set_title('Input dataset', fontsize='xx-large')
 
     titles = ['Input Gramian $\mathbf{{D}}$',
               '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
     for i, (M, t) in enumerate(zip([D, Q], titles)):
-        ax = plt.subplot(gs[i, 0])
+        ax = plt.subplot(gs[i + 1])
         plot_matrix(M, ax=ax)
         ax.set_title(t, fontsize='xx-large')
 
-    if X.shape[1] == 2:
-        ax = plt.subplot(gs[0, 1])
-    if X.shape[1] == 3:
-        ax = plt.subplot(gs[0, 1], projection='3d')
-    plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
-    ax.set_title('Original dataset', fontsize='xx-large')
-
     if target_dim == 2:
-        ax = plt.subplot(gs[1, 1])
+        ax = plt.subplot(gs[3])
     if target_dim == 3:
-        ax = plt.subplot(gs[1, 1], projection='3d')
+        ax = plt.subplot(gs[3], projection='3d')
     plot_data_embedded(embedding, ax=ax, palette=palette)
     ax.set_title('2D embedding', fontsize='xx-large')
 
@@ -127,13 +127,13 @@ def test_yale_faces(subjects=[1]):
 
 if __name__ == '__main__':
     test_trefoil()
-    # test_teapot()
-    # for i in range(10):
-    #     test_mnist(digit=i)
-    # test_yale_faces(subjects=[1])
-    # test_yale_faces(subjects=[1, 4])
-    # test_yale_faces(subjects=[1, 4, 5])
-    # test_yale_faces(subjects=[1, 4, 37])
-    # test_yale_faces(subjects=[1, 4, 5, 27])
+    test_teapot()
+    for i in range(10):
+        test_mnist(digit=i)
+    test_yale_faces(subjects=[1])
+    test_yale_faces(subjects=[1, 4])
+    test_yale_faces(subjects=[1, 4, 5])
+    test_yale_faces(subjects=[1, 4, 37])
+    test_yale_faces(subjects=[1, 4, 5, 27])
 
     plt.show()
