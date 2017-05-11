@@ -28,7 +28,7 @@ def test_multilayer(X, gt, n_clusters, filename):
 
     titles = ['Input Gramian $\mathbf{{D}}$',
               '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
-              '$\mathbf{{Q}}$ (non-linearly rescaled)']
+              '$\mathbf{{Q}}$ (enhanced contrast)']
     for i, (M, t) in enumerate(zip([D, Q, Q_log], titles)):
         ax = plt.subplot(1, 4, i + 2)
         plot_matrix(M, ax=ax)
