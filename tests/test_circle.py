@@ -226,8 +226,8 @@ def test_circle_sdp_lp():
     gs = gridspec.GridSpec(1, 2, wspace=0.3)
 
     ax = plt.subplot(gs[0])
-    plt.plot(eigvals, linewidth=3, label='SDP')
     plt.plot(q, linewidth=3, label='LP')
+    plt.plot(eigvals, linewidth=3, linestyle=':', label='SDP')
     plt.xlim(0, len(eigvals))
     plt.ylim(0, 1)
     plt.xlabel('Eigenvalues', fontsize='xx-large')
@@ -249,8 +249,8 @@ def test_circle_sdp_lp():
 
 
 if __name__ == '__main__':
-    test_circles()
-    test_one_circle()
+    # test_circles()
+    # test_one_circle()
     test_circle_sdp_lp()
 
     plt.show()
