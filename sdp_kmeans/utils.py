@@ -12,11 +12,12 @@ def connected_components(sym_mat, thresh=1e-4):
     binary_mat = sym_mat > sym_mat.max() * thresh
     n_comp, labels = inner_conn_comp(binary_mat, directed=False,
                                      return_labels=True)
-    Q_labels = 0
-    clusters = []
-    for i in range(n_comp):
-        mask = labels == i
-        Q_labels += np.outer(mask, mask)
-        clusters.append(mask)
+    clusters = [labels == i for i in range(n_comp)]
+    return clusters
 
-    return Q_labels, clusters
+
+def log_scale(mat):
+    mat = np.abs(mat)
+    mat *= 1e3
+    mat += 1
+    return np.log10(mat)
