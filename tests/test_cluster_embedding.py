@@ -50,7 +50,7 @@ def test_thin_lines(n_clusters, target_dim):
 
     titles = ['Input Gramian',
               '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
-              '$\mathbf{{Q}}$ (rescaled)']
+              '$\mathbf{{Q}}$ (enhanced contrast)']
     for i, (D_input, t) in enumerate(zip([D, Q, Q_log], titles)):
         ax = plt.subplot(1, 4, i + 2)
         plot_matrix(D_input, ax=ax)
@@ -99,7 +99,7 @@ def test_turntable(n_clusters, target_dim):
 
     titles = ['Input Gramian',
               '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
-              '$\mathbf{{Q}}$ (rescaled)']
+              '$\mathbf{{Q}}$ (enhanced contrast)']
     for i, (D_input, t) in enumerate(zip([D, Q, Q_log], titles)):
         ax = plt.subplot(1, 4, i + 2)
         plot_matrix(D_input, ax=ax)
