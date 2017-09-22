@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn.apionly as sns
 import sys
+import warnings
 
 
 def plot_confusion_matrix(conf_mat):
@@ -99,6 +100,11 @@ def plot_data_clustered(X, gt, marker='o', ax=None):
     ax.set_ylim(ymin=center[1] - range, ymax=center[1] + range)
 
 
+formatwarning_orig = warnings.formatwarning
+warnings.formatwarning = lambda message, category, filename, lineno, line=None:\
+    formatwarning_orig(message, category, filename, lineno, line='')
+
+
 def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
     if ax is None:
         ax = plt.gca()
@@ -137,7 +143,11 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
     else:
-        raise RuntimeError('Can only plot 2d or 3d data.')
+        msg = 'Plotting first two dimensions out of {}.'.format(X.shape[1])
+
+        warnings.warn(msg, category=RuntimeWarning)
+        plot_data_embedded(X[:, :2], palette=palette, marker=marker, ax=ax,
+                           elev_azim=elev_azim)
 
 
 def plot_images_embedded(embedding, img_getter, labels=None, palette='hls',
