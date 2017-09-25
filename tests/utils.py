@@ -1,3 +1,4 @@
+import matplotlib.colors as mpl_colors
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import numpy as np
@@ -105,14 +106,42 @@ warnings.formatwarning = lambda message, category, filename, lineno, line=None:\
     formatwarning_orig(message, category, filename, lineno, line='')
 
 
-def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
+def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
+                       alpha=1):
+    if X.shape[1] != 2 and X.shape[1] != 3:
+        msg = 'Plotting first two dimensions out of {}.'.format(X.shape[1])
+        warnings.warn(msg, category=RuntimeWarning)
+
+        X = X[:, :2]
+
+    _plot_data_embedded(X, palette=palette, marker=marker, ax=ax,
+                        elev_azim=elev_azim, alpha=alpha)
+
+
+def _plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
+                       alpha=1):
     if ax is None:
         ax = plt.gca()
 
-    if palette == 'none':
-        colors = '#377eb8'
+    if palette == 'w':
+        colors = [(1, 1, 1)] * len(X)
+    elif palette == 'k':
+        colors = [(0, 0, 0)] * len(X)
+    elif palette == 'none':
+        c = mpl_colors.to_rgb(palette)
+        colors = [c] * len(X)
+    elif isinstance(palette, str) and palette[0] == '#':
+        c = mpl_colors.to_rgb(palette)
+        colors = [c] * len(X)
     else:
         colors = sns.color_palette(palette, n_colors=len(X))
+
+    try:
+        colors = [c + (a,) for c, a in zip(colors, alpha)]
+        alpha = None
+        edgecolors = 'k'
+    except TypeError:
+        edgecolors = colors
 
     X_max = X.max(axis=0)
     X_min = X.min(axis=0)
@@ -120,8 +149,8 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
     center = (X_max + X_min) / 2.
 
     if X.shape[1] == 2:
-        ax.scatter(X[:, 0], X[:, 1], c=colors, edgecolors=colors,
-                   marker=marker)
+        ax.scatter(X[:, 0], X[:, 1], c=colors, edgecolors=edgecolors,
+                   marker=marker, alpha=alpha)
 
         ax.set_aspect('equal')
         ax.get_xaxis().set_visible(False)
@@ -134,7 +163,7 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
             ax.view_init(elev=elev_azim[0], azim=elev_azim[1])
 
         ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=colors, edgecolors=colors,
-                   marker=marker)
+                   marker=marker, alpha=alpha)
 
         ax.set_xlim(center[0] - range, center[0] + range)
         ax.set_ylim(center[1] - range, center[1] + range)
@@ -142,12 +171,6 @@ def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None):
         ax.set_aspect('equal')
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-    else:
-        msg = 'Plotting first two dimensions out of {}.'.format(X.shape[1])
-
-        warnings.warn(msg, category=RuntimeWarning)
-        plot_data_embedded(X[:, :2], palette=palette, marker=marker, ax=ax,
-                           elev_azim=elev_azim)
 
 
 def plot_images_embedded(embedding, img_getter, labels=None, palette='hls',
