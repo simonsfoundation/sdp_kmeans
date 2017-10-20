@@ -16,7 +16,7 @@ if not os.path.exists(dir_name):
 
 
 def test_multilayer(X, gt, n_clusters, filename):
-    D, Q = sdp_kmeans(X, [n_clusters])
+    D, Q = sdp_kmeans(X, n_clusters)
     Q_log = log_scale(Q)
 
     sns.set_style('white')
