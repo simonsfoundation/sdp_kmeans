@@ -1,5 +1,4 @@
 from __future__ import absolute_import, print_function
-import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import os
 import seaborn.apionly as sns
