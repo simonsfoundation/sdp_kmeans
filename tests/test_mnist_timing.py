@@ -10,7 +10,6 @@ from data import real
 from sdp_kmeans import sdp_kmeans, sdp_km_burer_monteiro
 from tests.utils import Logger
 
-
 dir_name = '../results/'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
@@ -28,9 +27,11 @@ def check_completely_positivity(sym_mat, Y):
 def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
                from_file=False):
     if not from_file:
-        time_sdp = {}
+        time_sdp_cvx = {}
         time_sdp_bm = dict([(rf, {}) for rf in rank_factors])
         rel_err_sdp_bm = dict([(rf, {}) for rf in rank_factors])
+        time_sdp_cgm = {}
+        rel_err_sdp_cgm = {}
 
         for n_samples in n_samples_range:
             print('---')
@@ -42,10 +43,10 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
             if n_samples <= 1000:
                 t = timeit.default_timer()
-                Q_sdp = sdp_kmeans(X, k, method='cvx')
+                Q_cvx = sdp_kmeans(X, k, method='cvx')
                 t = timeit.default_timer() - t
-                print('SDP', t)
-                time_sdp[n_samples] = t
+                print('SDP-CVX', t)
+                time_sdp_cvx[n_samples] = t
 
             for rf in rank_factors:
                 np.random.seed(0)
@@ -55,43 +56,68 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
                 time_sdp_bm[rf][n_samples] = t
                 Q_bm = Y.dot(Y.T)
                 if n_samples <= 1000:
-                    rel_err = (np.linalg.norm(Q_sdp[-1] - Q_bm, 'fro')
-                               / np.linalg.norm(Q_sdp[-1], 'fro'))
+                    rel_err = (np.linalg.norm(Q_cvx[-1] - Q_bm, 'fro')
+                               / np.linalg.norm(Q_cvx[-1], 'fro'))
                     rel_err_sdp_bm[rf][n_samples] = rel_err
                     print('BM rank-{}'.format(rf), t, rel_err)
                 else:
                     print('BM rank-{}'.format(rf), t)
 
+            t = timeit.default_timer()
+            Q_cgm = sdp_kmeans(X, k, method='cgm')
+            t = timeit.default_timer() - t
+            time_sdp_cgm[n_samples] = t
+            if n_samples <= 1000:
+                rel_err = (np.linalg.norm(Q_cvx[-1] - Q_cgm[-1], 'fro')
+                           / np.linalg.norm(Q_cvx[-1], 'fro'))
+                rel_err_sdp_cgm[n_samples] = rel_err
+                print('SDP_CGM', t, rel_err)
+            else:
+                print('SDP_CGM', t)
+
             with open('mnist_times.pickle', 'wb') as file:
                 pickle.dump(n_samples_range, file)
-                pickle.dump(time_sdp, file)
+                pickle.dump(time_sdp_cvx, file)
                 pickle.dump(time_sdp_bm, file)
                 pickle.dump(rel_err_sdp_bm, file)
+                pickle.dump(time_sdp_cgm, file)
+                pickle.dump(rel_err_sdp_cgm, file)
+
     else:
         with open('mnist_times.pickle', 'rb') as file:
             n_samples_range = pickle.load(file)
-            time_sdp = pickle.load(file)
+            time_sdp_cvx = pickle.load(file)
             time_sdp_bm = pickle.load(file)
             rel_err_sdp_bm = pickle.load(file)
+            time_sdp_cgm = pickle.dump(file)
+            rel_err_sdp_cgm = pickle.dump(file)
 
     sns.set_style('whitegrid')
     sns.set_color_codes()
 
     plt.figure()
     n_samples_range_active = [ns for ns in n_samples_range
-                              if ns in time_sdp]
-    plt.plot(n_samples_range_active,
-             [time_sdp[ns] for ns in n_samples_range_active],
-             linewidth=2,
-             label=r'convex SDP solver ($K={0}$)'.format(k))
+                              if ns in time_sdp_cvx]
+    plt.loglog(n_samples_range_active,
+               [time_sdp_cvx[ns] for ns in n_samples_range_active],
+               linewidth=2,
+               label=r'standard SDP solver ($K={0}$)'.format(k))
 
     for rf in time_sdp_bm:
         n_samples_range_active = [ns for ns in n_samples_range
                                   if ns in time_sdp_bm[rf]]
         plt.loglog(n_samples_range_active,
-                 [time_sdp_bm[rf][ns] for ns in n_samples_range_active],
-                 linewidth=2,
-                 label=r'non-convex SDP solver ($K={0}, r={1}$)'.format(k, k * rf))
+                   [time_sdp_bm[rf][ns] for ns in n_samples_range_active],
+                   linewidth=2,
+                   label=r'non-convex SDP solver ($K={0}, r={1}$)'.format(k,
+                                                                          k * rf))
+
+    n_samples_range_active = [ns for ns in n_samples_range
+                              if ns in time_sdp_cgm]
+    plt.loglog(n_samples_range_active,
+               [time_sdp_cgm[ns] for ns in n_samples_range_active],
+               linewidth=2,
+               label=r'conditional gradient SDP solver ($K={0}$)'.format(k))
 
     plt.xlabel('Dataset size ($n$)', fontsize='x-large')
     plt.ylabel('Time (s)', fontsize='x-large')
@@ -103,6 +129,8 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
 
 if __name__ == '__main__':
+    # Beware: this test can take a really long time!
+
     logger = Logger(dir_name + 'test_clustering_real.txt')
     sys.stdout = logger
 
@@ -111,7 +139,7 @@ if __name__ == '__main__':
     n_samples_range += list(range(2000, 10001, 1000))
 
     test_mnist(16, n_samples_range, rank_factors=[4, 8], digit=1,
-               from_file=True)
+               from_file=False)
 
     plt.show()
 
