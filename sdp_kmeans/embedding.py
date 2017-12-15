@@ -3,8 +3,9 @@ from numpy.linalg import eigh
 from sdp_kmeans.sdp import sdp_kmeans
 
 
-def sdp_kmeans_embedding(X, n_clusters, target_dim, ret_sdp=False):
-    D, Q = sdp_kmeans(X, n_clusters)
+def sdp_kmeans_embedding(X, n_clusters, target_dim, ret_sdp=False,
+                         method='cvx'):
+    D, Q = sdp_kmeans(X, n_clusters, method=method)
     Y = spectral_embedding(Q, target_dim=target_dim, discard_first=True)
     if ret_sdp:
         return Y, D, Q
