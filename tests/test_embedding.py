@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 import os
 import seaborn.apionly as sns
 from sdp_kmeans import sdp_kmeans_embedding
@@ -27,10 +28,10 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
     plt.figure(figsize=(12, 6), tight_layout=True)
     gs = gridspec.GridSpec(1, 4, width_ratios=(1, 1, 1, 1))
 
-    if X.shape[1] == 2:
-        ax = plt.subplot(gs[0])
     if X.shape[1] == 3:
         ax = plt.subplot(gs[0], projection='3d')
+    else:
+        ax = plt.subplot(gs[0])
     plot_data_embedded(X, ax=ax, palette=palette, elev_azim=elev_azim)
     ax.set_title('Input dataset', fontsize='xx-large')
 
@@ -49,6 +50,8 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
     ax.set_title('2D embedding', fontsize='xx-large')
 
     plt.savefig('{}{}.pdf'.format(dir_name, filename))
+
+    return D, Q
 
 
 def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
@@ -87,6 +90,32 @@ def test_swiss_roll():
     X = toy.swiss_roll_3d(n_samples=200)
     test_toy_embedding(X, 32, 2, 'swiss_roll_3d', palette='Spectral',
                        elev_azim=(7, -80))
+
+
+def test_square_grid():
+    X = np.mgrid[0:16, 0:16]
+    X = X.reshape((len(X), -1)).T
+
+    name = 'square'
+    D, Q = test_toy_embedding(X, 32, 2, name, palette='hls')
+
+    def plot_mat_on_data(mat, sample):
+        plt.figure()
+        plot_data_embedded(X, palette='w')
+        alpha = np.maximum(mat[sample], 0) / mat[sample].max()
+        plot_data_embedded(X, palette='#FF0000', alpha=alpha)
+
+    pdf_file_name = '{}{}_plot_{}_on_data_{}{}'
+
+    plot_mat_on_data(D, 7 * 16 + 7)
+    plt.savefig(pdf_file_name.format(dir_name, name, 'D', 'middle', '.pdf'))
+    plot_mat_on_data(Q, 7 * 16 + 7)
+    plt.savefig(pdf_file_name.format(dir_name, name, 'Q', 'middle', '.pdf'))
+
+    # for s in range(len(X)):
+    #     plot_mat_on_data(Q, s)
+    #     plt.savefig(pdf_file_name.format(dir_name, name, 'Q', s, '.png'))
+    #     plt.close()
 
 
 def test_trefoil():
@@ -135,5 +164,6 @@ if __name__ == '__main__':
     test_yale_faces(subjects=[1, 4, 5])
     test_yale_faces(subjects=[1, 4, 37])
     test_yale_faces(subjects=[1, 4, 5, 27])
+    test_square_grid()
 
     plt.show()
