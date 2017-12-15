@@ -1,7 +1,9 @@
 from __future__ import print_function, division, absolute_import
 import cvxpy as cp
 from functools import partial
+import matplotlib.pyplot as plt
 import numpy as np
+import scipy.sparse as sp
 from scipy.optimize import minimize
 from sdp_kmeans.nmf import symnmf_gram_admm
 from sdp_kmeans.utils import dot_matrix
@@ -11,6 +13,9 @@ def sdp_kmeans(X, n_clusters, method='cvx'):
     if method == 'cvx':
         D = dot_matrix(X)
         Q = sdp_km(D, n_clusters)
+    elif method == 'cgm':
+        D = dot_matrix(X)
+        Q = sdp_conditional_gradient(D, n_clusters)
     elif method == 'bm':
         Y = sdp_km_burer_monteiro(X, n_clusters)
         D = dot_matrix(X)
@@ -22,14 +27,22 @@ def sdp_kmeans(X, n_clusters, method='cvx'):
 
 
 def sdp_km(D, n_clusters):
-    Z = cp.Semidef(D.shape[0])
     ones = np.ones((D.shape[0], 1))
+    Z = cp.Semidef(D.shape[0])
     objective = cp.Maximize(cp.trace(D * Z))
     constraints = [Z >= 0,
                    Z * ones == ones,
                    cp.trace(Z) == n_clusters]
+
     prob = cp.Problem(objective, constraints)
-    prob.solve(solver=cp.SCS)
+    prob.solve(solver=cp.SCS, verbose=False)
+
+    Q = np.asarray(Z.value)
+    rs = Q.sum(axis=1)
+    print('Q', Q.min(), Q.max(), '|',
+          rs.min(), rs.max(), '|',
+          np.trace(Q), np.trace(D.dot(Q)))
+    print('Final objective', np.trace(D.dot(Q)))
 
     return np.asarray(Z.value)
 
@@ -108,3 +121,89 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
             break
 
     return Y
+
+
+def sdp_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
+                             verbose=True):
+    n = len(D)
+    one_over_n = 1. / n
+
+    def gradient(Q, lagrange_lower_bound, t):
+        delta = -D
+
+        delta += lagrange_lower_bound
+        penalty = (t + 1) ** 0.5
+        delta += penalty * np.minimum(Q + one_over_n, 0)
+        return delta
+
+    def solve_lp(grad, t):
+        # The following commented 2 lines are the mathematically
+        # friendly version of the 2 lines following them.
+        # ortho_mat = np.eye(n) - np.ones_like(D) / n
+        # A = ortho_mat.dot(grad).dot(ortho_mat)
+        grad11 = np.broadcast_to(grad.sum(axis=1) / n, (n, n))
+        A = grad - grad11 - grad11.T + grad.sum() / (n ** 2)
+
+        tol = (t + 1) ** -1
+        return sp.linalg.eigsh(A, k=1, which='SA', tol=tol)
+
+    if verbose:
+        error_list = []
+        obj_value_list = []
+
+    Q = np.zeros_like(D)
+    lagrange_lower_bound = np.zeros(D.shape)
+    step = 1
+    n_inner_iter = 10
+
+    for t in range(int(max_iter)):
+        for inner_it in range(n_inner_iter):
+            grad = gradient(Q, lagrange_lower_bound, t)
+            s, v, = solve_lp(grad, t)
+
+            if s < 0:
+                eta = 2. / (t * n_inner_iter + inner_it + 2)
+                Q = (1 - eta) * Q + eta * (n_clusters - 1) * np.outer(v, v)
+
+        Q_nneg = Q + one_over_n
+
+        err = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
+        if verbose:
+            obj_value_list.append(np.trace(D.dot(Q)))
+            error_list.append(err)
+        if err < stop_tol:
+            break
+
+        lagrange_lower_bound += step * Q_nneg
+        np.minimum(lagrange_lower_bound, 0, out=lagrange_lower_bound)
+
+        if verbose and t % 10 == 0:
+            row_sum = Q.sum(axis=1)
+            print((t + 1) ** -1)
+            print('iteration', t, 'Q', -one_over_n, Q.min(), Q.max(), '|',
+                  row_sum.min(), row_sum.max(), '|',
+                  np.trace(Q), np.trace(D.dot(Q)), '|',
+                  eta)
+
+    Q += one_over_n
+
+    if verbose:
+        _, axes = plt.subplots(1, 2)
+        axes[0].loglog(error_list)
+        axes[0].set_title('Error')
+        axes[1].semilogx(obj_value_list)
+        axes[1].set_title('Objective value')
+
+        row_sum_avg = np.mean(Q.sum(axis=1))
+        c = np.sqrt(n) * Q.dot(row_sum_avg)
+        print('sum constraint', c.min(), c.max())
+        print('trace constraint', np.trace(Q))
+        print('nonnegative constraint', np.min(Q), np.mean(np.minimum(Q, 0)))
+
+        # plt.figure()
+        # plt.plot(np.linalg.eigvalsh(Q))
+        # plt.title('Eigenvalues')
+
+    print('final objective', np.trace(D.dot(Q)))
+
+    return Q
