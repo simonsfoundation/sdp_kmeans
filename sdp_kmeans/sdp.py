@@ -15,7 +15,7 @@ def sdp_kmeans(X, n_clusters, method='cvx'):
         Q = sdp_km(D, n_clusters)
     elif method == 'cgm':
         D = dot_matrix(X)
-        Q = sdp_conditional_gradient(D, n_clusters)
+        Q = sdp_km_conditional_gradient(D, n_clusters)
     elif method == 'bm':
         Y = sdp_km_burer_monteiro(X, n_clusters)
         D = dot_matrix(X)
@@ -123,8 +123,8 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     return Y
 
 
-def sdp_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
-                             verbose=True):
+def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
+                                verbose=False):
     n = len(D)
     one_over_n = 1. / n
 
@@ -148,7 +148,7 @@ def sdp_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
         return sp.linalg.eigsh(A, k=1, which='SA', tol=tol)
 
     if verbose:
-        error_list = []
+        rmse_list = []
         obj_value_list = []
 
     Q = np.zeros_like(D)
@@ -167,11 +167,11 @@ def sdp_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
 
         Q_nneg = Q + one_over_n
 
-        err = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
+        rmse = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
         if verbose:
             obj_value_list.append(np.trace(D.dot(Q)))
-            error_list.append(err)
-        if err < stop_tol:
+            rmse_list.append(rmse)
+        if rmse < stop_tol:
             break
 
         lagrange_lower_bound += step * Q_nneg
@@ -188,22 +188,15 @@ def sdp_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
     Q += one_over_n
 
     if verbose:
-        _, axes = plt.subplots(1, 2)
-        axes[0].loglog(error_list)
-        axes[0].set_title('Error')
-        axes[1].semilogx(obj_value_list)
-        axes[1].set_title('Objective value')
-
         row_sum_avg = np.mean(Q.sum(axis=1))
         c = np.sqrt(n) * Q.dot(row_sum_avg)
         print('sum constraint', c.min(), c.max())
         print('trace constraint', np.trace(Q))
         print('nonnegative constraint', np.min(Q), np.mean(np.minimum(Q, 0)))
 
-        # plt.figure()
-        # plt.plot(np.linalg.eigvalsh(Q))
-        # plt.title('Eigenvalues')
-
     print('final objective', np.trace(D.dot(Q)))
 
-    return Q
+    if verbose:
+        return Q, rmse_list, obj_value_list
+    else:
+        return Q
