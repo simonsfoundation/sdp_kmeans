@@ -14,7 +14,7 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def test_multilayer(X, gt, n_clusters, filename):
+def test_clustering(X, gt, n_clusters, filename):
     D, Q = sdp_kmeans(X, n_clusters)
     Q_log = log_scale(Q)
 
@@ -39,15 +39,15 @@ def test_multilayer(X, gt, n_clusters, filename):
 
 if __name__ == '__main__':
     X, gt = toy.gaussian_blobs()
-    test_multilayer(X, gt, 16, 'gaussian_blobs')
+    test_clustering(X, gt, 16, 'gaussian_blobs')
 
     X, gt = toy.circles()
-    test_multilayer(X, gt, 16, 'circles')
+    test_clustering(X, gt, 16, 'circles')
 
     X, gt = toy.moons()
-    test_multilayer(X, gt, 16, 'moons')
+    test_clustering(X, gt, 16, 'moons')
 
     X, gt = toy.double_swiss_roll()
-    test_multilayer(X, gt, 64, 'double_swiss_roll')
+    test_clustering(X, gt, 64, 'double_swiss_roll')
 
     plt.show()
