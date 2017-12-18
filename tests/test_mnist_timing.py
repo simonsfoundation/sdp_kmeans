@@ -89,8 +89,8 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
             time_sdp_cvx = pickle.load(file)
             time_sdp_bm = pickle.load(file)
             rel_err_sdp_bm = pickle.load(file)
-            time_sdp_cgm = pickle.dump(file)
-            rel_err_sdp_cgm = pickle.dump(file)
+            time_sdp_cgm = pickle.load(file)
+            rel_err_sdp_cgm = pickle.load(file)
 
     sns.set_style('whitegrid')
     sns.set_color_codes()
@@ -101,7 +101,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
     plt.loglog(n_samples_range_active,
                [time_sdp_cvx[ns] for ns in n_samples_range_active],
                linewidth=2,
-               label=r'standard SDP solver ($K={0}$)'.format(k))
+               label=r'standard SDP solver')
 
     for rf in time_sdp_bm:
         n_samples_range_active = [ns for ns in n_samples_range
@@ -109,15 +109,14 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
         plt.loglog(n_samples_range_active,
                    [time_sdp_bm[rf][ns] for ns in n_samples_range_active],
                    linewidth=2,
-                   label=r'non-convex SDP solver ($K={0}, r={1}$)'.format(k,
-                                                                          k * rf))
+                   label=r'non-convex SDP solver ($r={}$)'.format(k * rf))
 
     n_samples_range_active = [ns for ns in n_samples_range
                               if ns in time_sdp_cgm]
     plt.loglog(n_samples_range_active,
                [time_sdp_cgm[ns] for ns in n_samples_range_active],
                linewidth=2,
-               label=r'conditional gradient SDP solver ($K={0}$)'.format(k))
+               label=r'conditional gradient SDP solver')
 
     plt.xlabel('Dataset size ($n$)', fontsize='x-large')
     plt.ylabel('Time (s)', fontsize='x-large')
