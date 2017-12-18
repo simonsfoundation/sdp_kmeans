@@ -59,17 +59,17 @@ def test_cvx_vs_cgm(X, gt, n_clusters, filename):
 
 
 if __name__ == '__main__':
-    # X, gt = toy.gaussian_blobs()
-    # test_cvx_vs_cgm(X, gt, 16, 'gaussian_blobs')
-    #
-    # X, gt = toy.circles()
-    # test_cvx_vs_cgm(X, gt, 16, 'circles')
-    #
-    # X, gt = toy.moons()
-    # test_cvx_vs_cgm(X, gt, 16, 'moons')
-    #
-    # X, gt = toy.double_swiss_roll()
-    # test_cvx_vs_cgm(X, gt, 64, 'double_swiss_roll')
+    X, gt = toy.gaussian_blobs()
+    test_cvx_vs_cgm(X, gt, 16, 'gaussian_blobs')
+
+    X, gt = toy.circles()
+    test_cvx_vs_cgm(X, gt, 16, 'circles')
+
+    X, gt = toy.moons()
+    test_cvx_vs_cgm(X, gt, 16, 'moons')
+
+    X, gt = toy.double_swiss_roll()
+    test_cvx_vs_cgm(X, gt, 64, 'double_swiss_roll')
 
     X = toy.trefoil_knot(n_samples=200)
     gt = np.zeros((len(X),))
