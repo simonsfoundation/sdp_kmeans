@@ -124,7 +124,7 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 
 
 def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
-                                verbose=False):
+                                verbose=False, track_stats=False):
     n = len(D)
     one_over_n = 1. / n
 
@@ -147,7 +147,7 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
         tol = (t + 1) ** -1
         return sp.linalg.eigsh(A, k=1, which='SA', tol=tol)
 
-    if verbose:
+    if track_stats or verbose:
         rmse_list = []
         obj_value_list = []
 
@@ -168,7 +168,7 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
         Q_nneg = Q + one_over_n
 
         rmse = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
-        if verbose:
+        if track_stats or verbose:
             obj_value_list.append(np.trace(D.dot(Q)))
             rmse_list.append(rmse)
         if rmse < stop_tol:
@@ -196,7 +196,7 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
 
     print('final objective', np.trace(D.dot(Q)))
 
-    if verbose:
+    if track_stats:
         return Q, rmse_list, obj_value_list
     else:
         return Q
