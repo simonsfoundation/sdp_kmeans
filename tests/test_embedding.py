@@ -100,22 +100,32 @@ def test_square_grid():
     D, Q = test_toy_embedding(X, 32, 2, name, palette='hls')
 
     def plot_mat_on_data(mat, sample):
-        plt.figure()
         plot_data_embedded(X, palette='w')
         alpha = np.maximum(mat[sample], 0) / mat[sample].max()
         plot_data_embedded(X, palette='#FF0000', alpha=alpha)
 
     pdf_file_name = '{}{}_plot_{}_on_data_{}{}'
 
+    plt.figure()
     plot_mat_on_data(D, 7 * 16 + 7)
     plt.savefig(pdf_file_name.format(dir_name, name, 'D', 'middle', '.pdf'))
+
+    plt.figure()
     plot_mat_on_data(Q, 7 * 16 + 7)
     plt.savefig(pdf_file_name.format(dir_name, name, 'Q', 'middle', '.pdf'))
 
+    plt.figure(figsize=(12, 3), tight_layout=True)
+    gs = gridspec.GridSpec(1, 4, wspace=0.05)
+    for i, s in enumerate([59, 84, 138, 163]):
+        plt.subplot(gs[i])
+        plot_mat_on_data(Q, s)
+        plt.savefig(pdf_file_name.format(dir_name, name, 'Q', 'composite',
+                                         '.pdf'))
+
     # for s in range(len(X)):
+    #     plt.figure()
     #     plot_mat_on_data(Q, s)
-    #     plt.savefig(pdf_file_name.format(dir_name, name, 'Q', s, '.png'))
-    #     plt.close()
+    #     plt.savefig(pdf_file_name.format(dir_name, name, 'Q', s, '.pdf'))
 
 
 def test_trefoil():
@@ -155,15 +165,15 @@ def test_yale_faces(subjects=[1]):
 
 
 if __name__ == '__main__':
-    test_trefoil()
-    test_teapot()
-    for i in range(10):
-        test_mnist(digit=i)
-    test_yale_faces(subjects=[1])
-    test_yale_faces(subjects=[1, 4])
-    test_yale_faces(subjects=[1, 4, 5])
-    test_yale_faces(subjects=[1, 4, 37])
-    test_yale_faces(subjects=[1, 4, 5, 27])
+    # test_trefoil()
+    # test_teapot()
+    # for i in range(10):
+    #     test_mnist(digit=i)
+    # test_yale_faces(subjects=[1])
+    # test_yale_faces(subjects=[1, 4])
+    # test_yale_faces(subjects=[1, 4, 5])
+    # test_yale_faces(subjects=[1, 4, 37])
+    # test_yale_faces(subjects=[1, 4, 5, 27])
     test_square_grid()
 
     plt.show()
