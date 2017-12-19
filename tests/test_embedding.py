@@ -165,15 +165,15 @@ def test_yale_faces(subjects=[1]):
 
 
 if __name__ == '__main__':
-    # test_trefoil()
-    # test_teapot()
-    # for i in range(10):
-    #     test_mnist(digit=i)
-    # test_yale_faces(subjects=[1])
-    # test_yale_faces(subjects=[1, 4])
-    # test_yale_faces(subjects=[1, 4, 5])
-    # test_yale_faces(subjects=[1, 4, 37])
-    # test_yale_faces(subjects=[1, 4, 5, 27])
+    test_trefoil()
+    test_teapot()
+    for i in range(10):
+        test_mnist(digit=i)
+    test_yale_faces(subjects=[1])
+    test_yale_faces(subjects=[1, 4])
+    test_yale_faces(subjects=[1, 4, 5])
+    test_yale_faces(subjects=[1, 4, 37])
+    test_yale_faces(subjects=[1, 4, 5, 27])
     test_square_grid()
 
     plt.show()
