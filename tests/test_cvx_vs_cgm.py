@@ -16,14 +16,21 @@ if not os.path.exists(dir_name):
 
 
 def test_cvx_vs_cgm(X, gt, n_clusters, filename):
+    print('----', filename, '----')
+
     D, Q_cvx = sdp_kmeans(X, n_clusters, method='cvx')
 
-    out = sdp_km_conditional_gradient(D, n_clusters, stop_tol=1e-6, verbose=True)
+    out = sdp_km_conditional_gradient(D, n_clusters,
+                                      max_iter=3e3, stop_tol=1e-6,
+                                      track_stats=True)
     Q_cgm, cgm_rmse_list, cgm_obj_value_list = out
 
     cvx_rmse = np.sqrt(np.mean(Q_cvx[Q_cvx < 0] ** 2))
     cvx_error_list = [cvx_rmse] * len(cgm_obj_value_list)
     cvx_obj_value_list = [np.trace(D.dot(Q_cvx))] * len(cgm_obj_value_list)
+
+    print('Relative error CVX-CGM:',
+          np.linalg.norm(Q_cgm - Q_cvx) / np.linalg.norm(Q_cvx))
 
     sns.set_style('white')
     plt.figure(figsize=(12, 6), tight_layout=True)
@@ -60,13 +67,13 @@ def test_cvx_vs_cgm(X, gt, n_clusters, filename):
 
 if __name__ == '__main__':
     X, gt = toy.gaussian_blobs()
-    test_cvx_vs_cgm(X, gt, 16, 'gaussian_blobs')
+    test_cvx_vs_cgm(X, gt, 6, 'gaussian_blobs')
 
     X, gt = toy.circles()
     test_cvx_vs_cgm(X, gt, 16, 'circles')
 
     X, gt = toy.moons()
-    test_cvx_vs_cgm(X, gt, 16, 'moons')
+    test_cvx_vs_cgm(X, gt, 10, 'moons')
 
     X, gt = toy.double_swiss_roll()
     test_cvx_vs_cgm(X, gt, 64, 'double_swiss_roll')
@@ -77,6 +84,9 @@ if __name__ == '__main__':
 
     X = real.teapot()
     gt = np.zeros((len(X),))
-    test_cvx_vs_cgm(X, gt, 20, 'trefoil_knot')
+    test_cvx_vs_cgm(X, gt, 20, 'teapot')
+
+    X, gt = real.yale_faces(subjects=[1, 4, 5, 27])
+    test_cvx_vs_cgm(X, gt, 16, 'yale')
 
     plt.show()
