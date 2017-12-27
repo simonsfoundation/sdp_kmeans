@@ -188,9 +188,8 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
     Q += one_over_n
 
     if verbose:
-        row_sum_avg = np.mean(Q.sum(axis=1))
-        c = np.sqrt(n) * Q.dot(row_sum_avg)
-        print('sum constraint', c.min(), c.max())
+        row_sum = np.mean(Q.sum(axis=1))
+        print('sum constraint', row_sum.min(), row_sum.max())
         print('trace constraint', np.trace(Q))
         print('nonnegative constraint', np.min(Q), np.mean(np.minimum(Q, 0)))
 
