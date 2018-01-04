@@ -128,7 +128,7 @@ def _plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
     elif palette == 'k':
         colors = [(0, 0, 0)] * len(X)
     elif palette == 'none':
-        c = mpl_colors.to_rgb(palette)
+        c = mpl_colors.to_rgb('#377eb8')
         colors = [c] * len(X)
     elif isinstance(palette, str) and palette[0] == '#':
         c = mpl_colors.to_rgb(palette)
