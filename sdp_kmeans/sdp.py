@@ -44,7 +44,7 @@ def sdp_km(D, n_clusters):
           np.trace(Q), np.trace(D.dot(Q)))
     print('Final objective', np.trace(D.dot(Q)))
 
-    return np.asarray(Z.value)
+    return Q
 
 
 def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
