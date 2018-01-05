@@ -55,11 +55,12 @@ def test_toy_embedding(X, n_clusters, target_dim, filename, palette='hls',
 
 
 def test_real_embedding(X, n_clusters, target_dim, img_getter, filename,
-                        subsampling=10, zoom=.5, labels=None, palette='hls'):
+                        subsampling=10, zoom=.5, labels=None, palette='hls',
+                        method='cvx'):
     print('--------\n', filename)
 
     embedding, D, Q = sdp_kmeans_embedding(X, n_clusters, target_dim,
-                                           ret_sdp=True)
+                                           method=method, ret_sdp=True)
 
     sns.set_style('whitegrid')
     plt.figure(figsize=(12, 4), tight_layout=True)
@@ -142,15 +143,18 @@ def test_teapot():
     test_real_embedding(X, 20, 2, teapot_img, 'teapots')
 
 
-def test_mnist(digit=1):
-    X = real.mnist(digit=digit, n_samples=500)
+def test_mnist(digit=1, n_samples=500, n_clusters=16, method='cvx',
+               subsampling=5):
+    X = real.mnist(digit=digit, n_samples=n_samples)
+    print('Number of samples:', X.shape[0])
 
     def mnist_img(k):
         return 255. - X[k, :].reshape((28, 28))
 
-    filename = 'mnist{}'.format(digit)
-    test_real_embedding(X, 16, 2, mnist_img, filename, subsampling=5, zoom=0.3,
-                        palette='none')
+    filename = 'mnist{}_n{}_k{}'.format(digit, n_samples, n_clusters)
+    test_real_embedding(X, n_clusters, 2, mnist_img, filename,
+                        subsampling=subsampling, zoom=0.3, palette='none',
+                        method=method)
 
 
 def test_yale_faces(subjects=[1]):
@@ -175,5 +179,10 @@ if __name__ == '__main__':
     test_yale_faces(subjects=[1, 4, 37])
     test_yale_faces(subjects=[1, 4, 5, 27])
     test_square_grid()
+
+    # large-scale example, cannot use CVX
+    for n_clusters in [32, 64, 96, 128]:
+        test_mnist(digit=0, n_samples=0, n_clusters=n_clusters, method='cgm',
+                   subsampling=40)
 
     plt.show()
