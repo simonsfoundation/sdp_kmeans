@@ -18,14 +18,10 @@ if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
 
-def check_completely_positivity(sym_mat, Y):
-    error = (np.linalg.norm(sym_mat - Y.dot(Y.T), 'fro')
-             / np.linalg.norm(sym_mat, 'fro'))
-    return error
+def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
+                  from_file=False):
+    pickle_filename = 'mnist_k{}_times.pickle'.format(k)
 
-
-def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
-               from_file=False):
     if not from_file:
         time_sdp_cvx = {}
         time_sdp_bm = dict([(rf, {}) for rf in rank_factors])
@@ -75,7 +71,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
             else:
                 print('SDP_CGM', t)
 
-            with open('mnist_times.pickle', 'wb') as file:
+            with open(pickle_filename, 'wb') as file:
                 pickle.dump(n_samples_range, file)
                 pickle.dump(time_sdp_cvx, file)
                 pickle.dump(time_sdp_bm, file)
@@ -84,7 +80,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
                 pickle.dump(rel_err_sdp_cgm, file)
 
     else:
-        with open('mnist_times.pickle', 'rb') as file:
+        with open(pickle_filename, 'rb') as file:
             n_samples_range = pickle.load(file)
             time_sdp_cvx = pickle.load(file)
             time_sdp_bm = pickle.load(file)
@@ -124,7 +120,7 @@ def test_mnist(k, n_samples_range, rank_factors=[4, 8], digit=1,
     plt.ylim(1e-2, 1e4)
     plt.yticks(10. ** np.arange(-1, 5))
     plt.legend(loc='lower right', fontsize='x-large')
-    plt.savefig('{}mnist_sdp_bm_timing.pdf'.format(dir_name))
+    plt.savefig('{}mnist_timing.pdf'.format(dir_name))
 
 
 if __name__ == '__main__':
@@ -137,8 +133,11 @@ if __name__ == '__main__':
     n_samples_range += list(range(1000, 2000, 100))
     n_samples_range += list(range(2000, 10001, 1000))
 
-    test_mnist(16, n_samples_range, rank_factors=[4, 8], digit=1,
-               from_file=False)
+    mnist_timing(16, n_samples_range, rank_factors=[4, 8], digit=1,
+                 from_file=False)
+
+    mnist_timing(100, 5000, rank_factors=[25, 50, 100], digit=0,
+                 from_file=False)
 
     plt.show()
 
