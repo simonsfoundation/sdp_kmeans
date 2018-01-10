@@ -123,7 +123,8 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     return Y
 
 
-def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
+def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
+                                stop_tol_max=1e-1, stop_tol_rmse=1e-4,
                                 verbose=False, track_stats=False):
     n = len(D)
     one_over_n = 1. / n
@@ -168,10 +169,13 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
         Q_nneg = Q + one_over_n
 
         rmse = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
+        max_error = np.abs(np.min(Q_nneg[Q_nneg < 0])) / one_over_n
+
         if track_stats or verbose:
             obj_value_list.append(np.trace(D.dot(Q)))
             rmse_list.append(rmse)
-        if rmse < stop_tol:
+
+        if max_error < stop_tol_max and rmse < stop_tol_rmse:
             break
 
         lagrange_lower_bound += step * Q_nneg
@@ -179,7 +183,6 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3, stop_tol=1e-4,
 
         if verbose and t % 10 == 0:
             row_sum = Q.sum(axis=1)
-            print((t + 1) ** -1)
             print('iteration', t, 'Q', -one_over_n, Q.min(), Q.max(), '|',
                   row_sum.min(), row_sum.max(), '|',
                   np.trace(Q), np.trace(D.dot(Q)), '|',
