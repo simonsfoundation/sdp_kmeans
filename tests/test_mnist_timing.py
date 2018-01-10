@@ -39,33 +39,34 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
             if n_samples <= 1000:
                 t = timeit.default_timer()
-                Q_cvx = sdp_kmeans(X, k, method='cvx')
+                D, Q_cvx = sdp_kmeans(X, k, method='cvx')
                 t = timeit.default_timer() - t
                 print('SDP-CVX', t)
                 time_sdp_cvx[n_samples] = t
 
             for rf in rank_factors:
+                rank = k * rf
                 np.random.seed(0)
                 t = timeit.default_timer()
-                Y = sdp_km_burer_monteiro(X, k, rank=k * rf)
+                Y = sdp_km_burer_monteiro(X, k, rank=rank)
                 t = timeit.default_timer() - t
                 time_sdp_bm[rf][n_samples] = t
                 Q_bm = Y.dot(Y.T)
                 if n_samples <= 1000:
-                    rel_err = (np.linalg.norm(Q_cvx[-1] - Q_bm, 'fro')
-                               / np.linalg.norm(Q_cvx[-1], 'fro'))
+                    rel_err = (np.linalg.norm(Q_cvx - Q_bm, 'fro')
+                               / np.linalg.norm(Q_cvx, 'fro'))
                     rel_err_sdp_bm[rf][n_samples] = rel_err
-                    print('BM rank-{}'.format(rf), t, rel_err)
+                    print('BM rank-{}'.format(rank), t, rel_err)
                 else:
-                    print('BM rank-{}'.format(rf), t)
+                    print('BM rank-{}'.format(rank), t)
 
             t = timeit.default_timer()
-            Q_cgm = sdp_kmeans(X, k, method='cgm')
+            D, Q_cgm = sdp_kmeans(X, k, method='cgm')
             t = timeit.default_timer() - t
             time_sdp_cgm[n_samples] = t
             if n_samples <= 1000:
-                rel_err = (np.linalg.norm(Q_cvx[-1] - Q_cgm[-1], 'fro')
-                           / np.linalg.norm(Q_cvx[-1], 'fro'))
+                rel_err = (np.linalg.norm(Q_cvx - Q_cgm, 'fro')
+                           / np.linalg.norm(Q_cvx, 'fro'))
                 rel_err_sdp_cgm[n_samples] = rel_err
                 print('SDP_CGM', t, rel_err)
             else:
@@ -136,7 +137,7 @@ if __name__ == '__main__':
     mnist_timing(16, n_samples_range, rank_factors=[4, 8], digit=1,
                  from_file=False)
 
-    mnist_timing(200, [5000], rank_factors=[25, 50, 100, 200], digit=0,
+    mnist_timing(200, [5000], rank_factors=[2, 4, 8], digit=0,
                  from_file=False)
 
     plt.show()
