@@ -136,7 +136,7 @@ if __name__ == '__main__':
     mnist_timing(16, n_samples_range, rank_factors=[4, 8], digit=1,
                  from_file=False)
 
-    mnist_timing(100, 5000, rank_factors=[25, 50, 100], digit=0,
+    mnist_timing(200, [5000], rank_factors=[25, 50, 100, 200], digit=0,
                  from_file=False)
 
     plt.show()
