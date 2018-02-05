@@ -121,12 +121,13 @@ def test_square_grid():
         plt.subplot(gs[i])
         plot_mat_on_data(Q, s)
         plt.savefig(pdf_file_name.format(dir_name, name, 'Q', 'composite',
-                                         '.pdf'))
+                                         '.png'))
 
-    # for s in range(len(X)):
-    #     plt.figure()
-    #     plot_mat_on_data(Q, s)
-    #     plt.savefig(pdf_file_name.format(dir_name, name, 'Q', s, '.pdf'))
+    for s in range(len(X)):
+        plt.figure()
+        plot_mat_on_data(Q, s)
+        plt.savefig(pdf_file_name.format(dir_name, name, 'Q', s, '.png'))
+        plt.close()
 
 
 def test_trefoil():
