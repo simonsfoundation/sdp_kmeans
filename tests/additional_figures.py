@@ -66,7 +66,7 @@ def distances2gramian():
     #                  alpha=0.5)
     plt.plot(xtx_center, linewidth=2)
     plt.plot(np.maximum(xtx_center, 0), '--', linewidth=4,
-             label='SDP-KM kernel function')
+             label='NOMAD kernel function')
 
     plt.xticks(np.arange(0, len(xtx_center), 10), np.arange(len(dists[::10])))
     plt.xticks(np.linspace(0, len(x), 5, endpoint=True),
