@@ -98,8 +98,8 @@ def test_one_circle():
     k_range = np.arange(1, len(X) + 1)
     solutions = []
     for k in k_range:
-        Ds = sdp_kmeans(X, k)
-        solutions.append(Ds[-1])
+        D, Q = sdp_kmeans(X, k)
+        solutions.append(Q)
 
     sns.set_style('white')
     sns.set_color_codes()
@@ -112,10 +112,10 @@ def test_one_circle():
     plt.figure(figsize=(6, 6))
     n_diags = 10
     palette = sns.color_palette('hls', n_colors=n_diags + 1)
-    for k, D in zip(k_range, solutions):
-        D[D < 1e-3 * D.max()] = 0
+    for k, Q in zip(k_range, solutions):
+        Q[Q < 1e-3 * Q.max()] = 0
 
-        values = np.unique(D)
+        values = np.unique(Q)
         try:
             abscissa = [k] * len(values)
         except TypeError:
@@ -124,7 +124,7 @@ def test_one_circle():
                    edgecolors='none')
 
         for i in range(n_diags):
-            values = np.unique(np.diag(D, k=i))
+            values = np.unique(np.diag(Q, k=i))
             try:
                 abscissa = [k] * len(values)
             except TypeError:
@@ -145,9 +145,9 @@ def test_one_circle():
 
     number_of_eigvals = []
     F = dft(len(X), scale='sqrtn')
-    for k, D in zip(k_range, solutions):
-        eigvals = np.diag(F.dot(D).dot(np.conjugate(F).T))
-        mask = eigvals >= (k * 1e-2)
+    for k, Q in zip(k_range, solutions):
+        eigvals = np.diag(F.dot(Q).dot(np.conjugate(F).T))
+        mask = eigvals >= (k / (len(X) * 10))
         number_of_eigvals.append(np.sum(mask))
 
     plt.plot(k_range, number_of_eigvals, marker='o')
@@ -249,8 +249,8 @@ def test_circle_sdp_lp():
 
 
 if __name__ == '__main__':
-    # test_circles()
-    # test_one_circle()
+    test_circles()
+    test_one_circle()
     test_circle_sdp_lp()
 
     plt.show()
