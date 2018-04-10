@@ -144,8 +144,7 @@ def test_teapot():
     test_real_embedding(X, 20, 2, teapot_img, 'teapots')
 
 
-def test_mnist(digit=1, n_samples=500, n_clusters=16, method='cvx',
-               subsampling=5):
+def test_mnist(digit=1, n_samples=500, n_clusters=16, subsampling=5):
     X = real.mnist(digit=digit, n_samples=n_samples)
     print('Number of samples:', X.shape[0])
 
@@ -154,8 +153,7 @@ def test_mnist(digit=1, n_samples=500, n_clusters=16, method='cvx',
 
     filename = 'mnist{}_n{}_k{}'.format(digit, n_samples, n_clusters)
     test_real_embedding(X, n_clusters, 2, mnist_img, filename,
-                        subsampling=subsampling, zoom=0.3, palette='none',
-                        method=method)
+                        subsampling=subsampling, zoom=0.3, palette='none')
 
 
 def test_yale_faces(subjects=[1]):
