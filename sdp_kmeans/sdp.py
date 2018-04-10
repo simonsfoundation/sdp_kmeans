@@ -4,7 +4,7 @@ from functools import partial
 import numpy as np
 import scipy.sparse as sp
 from scipy.optimize import minimize
-from sdp_kmeans.nmf import symnmf_gram_admm
+from sdp_kmeans.nmf import symnmf_gram_admm, symnmf_admm
 from sdp_kmeans.utils import dot_matrix
 
 
@@ -54,8 +54,12 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     if X_norm.shape[0] > X_norm.shape[1]:
         cov = X_norm.T.dot(X_norm)
     else:
-        cov = X_norm.dot(X_norm.T)
+        XXt = X_norm.dot(X_norm.T)
+        cov = XXt
     X_norm /= np.trace(cov.dot(cov)) ** 0.25
+
+    if X_norm.shape[0] <= X_norm.shape[1]:
+        XXt /= np.trace(cov.dot(cov)) ** 0.5
 
     Y_shape = (len(X), rank)
     ones = np.ones((len(X), 1))
@@ -63,8 +67,11 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     def lagrangian(x, lambda1, lambda2, sigma1, sigma2):
         Y = x.reshape(Y_shape)
 
-        YtX = Y.T.dot(X_norm)
-        obj = -np.trace(YtX.dot(YtX.T))
+        if X_norm.shape[0] > X_norm.shape[1]:
+            YtX = Y.T.dot(X_norm)
+            obj = -np.trace(YtX.dot(YtX.T))
+        else:
+            obj = -np.trace(Y.T.dot(XXt).dot(Y))
 
         trYtY_minus_nclusters = np.trace(Y.T.dot(Y)) - n_clusters
         obj -= lambda1 * trYtY_minus_nclusters
@@ -79,7 +86,10 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
     def grad(x, lambda1, lambda2, sigma1, sigma2):
         Y = x.reshape(Y_shape)
 
-        delta = -2 * X_norm.dot(X_norm.T.dot(Y))
+        if X_norm.shape[0] > X_norm.shape[1]:
+            delta = -2 * X_norm.dot(X_norm.T.dot(Y))
+        else:
+            delta = -2 * XXt.dot(Y)
 
         YtY = Y.T.dot(Y)
         delta -= 2 * (lambda1
@@ -93,7 +103,10 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 
         return delta.flatten()
 
-    Y = symnmf_gram_admm(X_norm, rank)
+    if X_norm.shape[0] > X_norm.shape[1]:
+        Y = symnmf_gram_admm(X_norm, rank)
+    else:
+        Y = symnmf_admm(XXt, rank)
 
     lambda1 = 0.
     lambda2 = np.zeros((len(X), 1))
