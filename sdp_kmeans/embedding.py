@@ -21,6 +21,7 @@ def spectral_embedding(mat, target_dim, gramian=True, discard_first=True):
         first = target_dim
         last = None
     if not gramian:
+        mat = mat - mat.mean(axis=0)
         mat = mat.dot(mat.T)
     eigvals, eigvecs = eigh(mat)
 
