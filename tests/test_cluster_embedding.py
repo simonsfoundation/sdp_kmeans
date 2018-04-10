@@ -45,7 +45,7 @@ def test_thin_lines(n_clusters, target_dim):
     if X.shape[1] == 2:
         plot_data_clustered(X, gt, ax=ax)
     else:
-        X_emb = spectral_embedding(X, target_dim=2)
+        X_emb = spectral_embedding(X, target_dim=2, discard_first=False)
         plot_data_clustered(X_emb, gt, ax=ax)
 
     titles = ['Input Gramian',
