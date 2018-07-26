@@ -47,9 +47,9 @@ def plot_matrix(mat, cmap='gray_r', ax=None):
     ax.grid(False)
     ax.tick_params(axis='both',
                    which='both',
-                   bottom='off', top='off',
-                   left='off', right='off',
-                   labelbottom='off', labelleft='off')
+                   bottom=False, top=False,
+                   left=False, right=False,
+                   labelbottom=False, labelleft=False)
 
 
 def line_plot_clustered(X, gt, ax=None):
@@ -75,8 +75,8 @@ def line_plot_clustered(X, gt, ax=None):
     ax.set_xticks(xticks)
     ax.tick_params(axis='y',
                    which='both',
-                   left='off', right='off',
-                   labelleft='off')
+                   left=False, right=False,
+                   labelleft=False)
 
 
 def plot_data_clustered(X, gt, marker='o', ax=None):
