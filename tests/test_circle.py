@@ -203,7 +203,7 @@ def test_circle_sdp_lp():
     X = X[gt == 0, :]
 
     k = 16
-    _, Q_sdp = sdp_kmeans(X, k)[1]
+    Q_sdp = sdp_kmeans(X, k)[1]
     Q_lp, q = circle_lp(X, 16)
 
     eigvals, _ = np.linalg.eigh(Q_sdp)
