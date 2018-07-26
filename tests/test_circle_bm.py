@@ -3,7 +3,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import seaborn.apionly as sns
+import seaborn as sns
 from sdp_kmeans import sdp_km_burer_monteiro
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered

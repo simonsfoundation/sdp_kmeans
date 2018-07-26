@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import os
-import seaborn.apionly as sns
+import seaborn as sns
 from sdp_kmeans import sdp_kmeans_embedding
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_embedded, plot_images_embedded

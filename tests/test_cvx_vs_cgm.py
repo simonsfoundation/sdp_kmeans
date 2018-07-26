@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import seaborn.apionly as sns
+import seaborn as sns
 from sdp_kmeans import sdp_kmeans, sdp_km_conditional_gradient
 from data import real, toy
 from tests.utils import plot_matrix, plot_data_clustered

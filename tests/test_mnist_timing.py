@@ -4,7 +4,7 @@ import numpy as np
 import os
 import pickle
 import timeit
-import seaborn.apionly as sns
+import seaborn as sns
 import sys
 from data import real
 from sdp_kmeans import sdp_kmeans, sdp_km_burer_monteiro

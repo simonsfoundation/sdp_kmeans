@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 import matplotlib.pyplot as plt
 import os
-import seaborn.apionly as sns
+import seaborn as sns
 from sdp_kmeans import log_scale, sdp_kmeans
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered

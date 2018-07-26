@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import seaborn.apionly as sns
+import seaborn as sns
 from sdp_kmeans import connected_components, log_scale, sdp_kmeans,\
     spectral_embedding
 from data import toy, real
