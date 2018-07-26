@@ -57,9 +57,9 @@ def circles(n_samples=200, factor=0.5, noise=None, regular=True,
     return X, gt
 
 
-def moons():
+def moons(n_samples=200, noise=.05):
     random_state = 0
-    X, gt = sk_datasets.make_moons(n_samples=200, noise=.05,
+    X, gt = sk_datasets.make_moons(n_samples=n_samples, noise=noise,
                                    shuffle=False, random_state=random_state)
     return X, gt
 
