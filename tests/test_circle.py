@@ -203,22 +203,22 @@ def test_circle_sdp_lp():
     X = X[gt == 0, :]
 
     k = 16
-    D_sdp = sdp_kmeans(X, k)[1]
-    D_lp, q = circle_lp(X, 16)
+    _, Q_sdp = sdp_kmeans(X, k)[1]
+    Q_lp, q = circle_lp(X, 16)
 
-    eigvals, _ = np.linalg.eigh(D_sdp)
+    eigvals, _ = np.linalg.eigh(Q_sdp)
     eigvals = eigvals[::-1]
 
     sns.set_style('white')
     sns.set_color_codes()
 
     plt.figure()
-    plot_matrix(D_sdp)
+    plot_matrix(Q_sdp)
     plt.title('SDP solution', fontsize='xx-large')
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp'))
 
     plt.figure()
-    plot_matrix(D_lp)
+    plot_matrix(Q_lp)
     plt.title('LP solution', fontsize='xx-large')
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_lp'))
 
@@ -245,7 +245,7 @@ def test_circle_sdp_lp():
     plt.savefig('{}{}.pdf'.format(dir_name, 'circle_sdp_lp'))
 
     print(np.linalg.norm(eigvals - q) / np.linalg.norm(eigvals))
-    print(np.linalg.norm(D_sdp - D_lp, 'fro') / np.linalg.norm(D_sdp, 'fro'))
+    print(np.linalg.norm(Q_sdp - Q_lp, 'fro') / np.linalg.norm(Q_sdp, 'fro'))
 
 
 if __name__ == '__main__':
