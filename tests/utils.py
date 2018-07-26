@@ -2,7 +2,7 @@ import matplotlib.colors as mpl_colors
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn.apionly as sns
+import seaborn as sns
 import sys
 import warnings
 
