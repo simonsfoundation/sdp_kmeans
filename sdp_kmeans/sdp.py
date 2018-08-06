@@ -139,8 +139,9 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 
 
 def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
-                                stop_tol_max=1e-1, stop_tol_rmse=1e-4,
-                                verbose=False, track_stats=False):
+                                stop_tol_max=1e-2, stop_tol_rmse=1e-4,
+                                use_line_search=True,
+                                verbose=True, track_stats=False):
     n = len(D)
     one_over_n = 1. / n
 
@@ -204,34 +205,48 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
 
             if s < 0:
                 update = (n_clusters - 1) * np.outer(v, v)
-                eta_ls = line_search(update, Q, lagrange_lower_bound,
-                                     t * n_inner_iter + inner_it)
-                eta_fix = 2. / (t * n_inner_iter + inner_it + 2)
-                eta = np.maximum(eta_ls, eta_fix)
-                # eta = 2. / (t * n_inner_iter + inner_it + 2)
+                if use_line_search:
+                    eta_ls = line_search(update, Q, lagrange_lower_bound,
+                                         t * n_inner_iter + inner_it)
+                    eta_fix = 2. / (t * n_inner_iter + inner_it + 2)
+                    eta = np.maximum(eta_ls, eta_fix)
+                else:
+                    eta = 2. / (t * n_inner_iter + inner_it + 2)
+                    # eta = 2. / (inner_it + 2)
                 Q = (1 - eta) * Q + eta * update
 
         Q_nneg = Q + one_over_n
 
         rmse = np.sqrt(np.mean(Q_nneg[Q_nneg < 0] ** 2))
-        max_error = np.abs(np.min(Q_nneg[Q_nneg < 0])) / one_over_n
+        max_error = np.abs(np.min(Q_nneg[Q_nneg < 0])) / (n_clusters / n)
 
         if track_stats or verbose:
             obj_value_list.append(np.trace(D.dot(Q)))
             rmse_list.append(rmse)
 
-        if max_error < stop_tol_max and rmse < stop_tol_rmse:
-            break
 
+        # step = 1e-3
         lagrange_lower_bound += step * Q_nneg
         np.minimum(lagrange_lower_bound, 0, out=lagrange_lower_bound)
 
         if verbose and t % 10 == 0:
             row_sum = Q.sum(axis=1)
-            print('iteration', t, 'Q', -one_over_n, Q.min(), Q.max(), '|',
+            print('iteration', t, '|',
+                  -one_over_n, Q.min(), rmse, max_error, '|',
                   row_sum.min(), row_sum.max(), '|',
                   np.trace(Q), np.trace(D.dot(Q)), '|',
                   eta)
+
+        if max_error < stop_tol_max and rmse < stop_tol_rmse:
+            if verbose:
+                row_sum = Q.sum(axis=1)
+                print('iteration', t, '|',
+                      -one_over_n, Q.min(), rmse, max_error, '|',
+                      row_sum.min(), row_sum.max(), '|',
+                      np.trace(Q), np.trace(D.dot(Q)), '|',
+                      eta)
+
+            break
 
     Q += one_over_n
 
