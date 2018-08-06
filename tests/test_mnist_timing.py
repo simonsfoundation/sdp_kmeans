@@ -4,10 +4,12 @@ import numpy as np
 import os
 import pickle
 import timeit
+from scipy.io import loadmat
 import seaborn as sns
 import sys
 from data import real
-from sdp_kmeans import sdp_kmeans, sdp_km_burer_monteiro
+from sdp_kmeans import dot_matrix, sdp_km, sdp_km_conditional_gradient,\
+    sdp_km_burer_monteiro
 from tests.utils import Logger
 
 dir_name = '../results/'
@@ -39,7 +41,8 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
             if n_samples <= 1000:
                 t = timeit.default_timer()
-                D, Q_cvx = sdp_kmeans(X, k, method='cvx')
+                D = dot_matrix(X)
+                Q_cvx = sdp_km(D, k)
                 t = timeit.default_timer() - t
                 print('SDP-CVX', t)
                 time_sdp_cvx[n_samples] = t
@@ -61,7 +64,8 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
                     print('BM rank-{}'.format(rank), t)
 
             t = timeit.default_timer()
-            D, Q_cgm = sdp_kmeans(X, k, method='cgm')
+            D = dot_matrix(X)
+            Q_cgm = sdp_km_conditional_gradient(D, k, use_line_search=False)
             t = timeit.default_timer() - t
             time_sdp_cgm[n_samples] = t
             if n_samples <= 1000:
@@ -89,6 +93,15 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
             time_sdp_cgm = pickle.load(file)
             rel_err_sdp_cgm = pickle.load(file)
 
+    if os.path.exists('sdpnal-plus_mnist_timing.mat'):
+        sdpnal_mat = loadmat('sdpnal-plus_mnist_timing.mat')
+        time_sdp_sdpnal = sdpnal_mat['times'].T
+        n_samples_range_active_sdpnal = sdpnal_mat['sizes'].T
+        print(time_sdp_sdpnal)
+    else:
+        time_sdp_sdpnal = None
+        n_samples_range_active_sdpnal = None
+
     sns.set_style('whitegrid')
     sns.set_color_codes()
 
@@ -98,7 +111,12 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
     plt.loglog(n_samples_range_active,
                [time_sdp_cvx[ns] for ns in n_samples_range_active],
                linewidth=2,
-               label=r'standard SDP solver')
+               label=r'SCS')
+
+    if time_sdp_sdpnal is not None:
+        plt.loglog(n_samples_range_active_sdpnal, time_sdp_sdpnal,
+                   linewidth=2,
+                   label=r'SDPNAL+')
 
     for rf in time_sdp_bm:
         n_samples_range_active = [ns for ns in n_samples_range
@@ -137,8 +155,8 @@ if __name__ == '__main__':
     mnist_timing(16, n_samples_range, rank_factors=[4, 8], digit=1,
                  from_file=False)
 
-    mnist_timing(200, [5000], rank_factors=[2, 4, 8], digit=0,
-                 from_file=False)
+    # mnist_timing(200, [5000], rank_factors=[2, 4, 8], digit=0,
+    #              from_file=False)
 
     plt.show()
 
