@@ -141,7 +141,7 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
                                 stop_tol_max=1e-2, stop_tol_rmse=1e-4,
                                 use_line_search=True,
-                                verbose=True, track_stats=False):
+                                verbose=False, track_stats=False):
     n = len(D)
     one_over_n = 1. / n
 
