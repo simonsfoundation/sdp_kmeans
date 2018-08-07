@@ -140,6 +140,7 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 
 def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
                                 stop_tol_max=1e-2, stop_tol_rmse=1e-4,
+                                n_inner_iter=15,
                                 use_line_search=True,
                                 verbose=False, track_stats=False):
     n = len(D)
@@ -196,12 +197,11 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
     Q = np.zeros_like(D)
     lagrange_lower_bound = np.zeros(D.shape)
     step = 1
-    n_inner_iter = 10
 
     for t in range(int(max_iter)):
         for inner_it in range(n_inner_iter):
             grad = gradient(Q, lagrange_lower_bound, t)
-            s, v, = solve_lp(grad, t)
+            s, v, = solve_lp(grad, inner_it)
 
             if s < 0:
                 update = (n_clusters - 1) * np.outer(v, v)
@@ -212,7 +212,6 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
                     eta = np.maximum(eta_ls, eta_fix)
                 else:
                     eta = 2. / (t * n_inner_iter + inner_it + 2)
-                    # eta = 2. / (inner_it + 2)
                 Q = (1 - eta) * Q + eta * update
 
         Q_nneg = Q + one_over_n
@@ -224,8 +223,6 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
             obj_value_list.append(np.trace(D.dot(Q)))
             rmse_list.append(rmse)
 
-
-        # step = 1e-3
         lagrange_lower_bound += step * Q_nneg
         np.minimum(lagrange_lower_bound, 0, out=lagrange_lower_bound)
 
@@ -245,7 +242,6 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
                       row_sum.min(), row_sum.max(), '|',
                       np.trace(Q), np.trace(D.dot(Q)), '|',
                       eta)
-
             break
 
     Q += one_over_n
