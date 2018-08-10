@@ -31,7 +31,6 @@ def sdp_km(D, n_clusters, max_iters=5000):
     objective = cp.Maximize(cp.trace(D * Z))
     constraints = [Z >= 0,
                    Z * ones == ones,
-                   # cp.sum(Z, axis=1) == ones,
                    cp.trace(Z) == n_clusters]
 
     prob = cp.Problem(objective, constraints)
