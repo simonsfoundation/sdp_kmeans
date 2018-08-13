@@ -25,7 +25,7 @@ def sdp_kmeans(X, n_clusters, method='cvx'):
     return D, Q
 
 
-def sdp_km(D, n_clusters, max_iters=5000):
+def sdp_km(D, n_clusters, max_iters=5000, eps=1e-5):
     ones = np.ones((D.shape[0], 1))
     Z = cp.Semidef(D.shape[0])
     objective = cp.Maximize(cp.trace(D * Z))
@@ -34,7 +34,7 @@ def sdp_km(D, n_clusters, max_iters=5000):
                    cp.trace(Z) == n_clusters]
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(solver=cp.SCS, verbose=True, max_iters=max_iters)
+    prob.solve(solver=cp.SCS, verbose=False, max_iters=max_iters, eps=eps)
 
     Q = np.asarray(Z.value)
     rs = Q.sum(axis=1)
