@@ -1,3 +1,4 @@
+from matplotlib.collections import LineCollection
 import matplotlib.colors as mpl_colors
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
@@ -24,7 +25,8 @@ def plot_confusion_matrix(conf_mat):
     plt.yticks([])
 
 
-def plot_matrix(mat, cmap='gray_r', ax=None):
+def plot_matrix(mat, cmap='gray_r', labels=None, which_labels='both',
+                labels_palette='Set1', ax=None, colorbar_labelsize=None):
     if ax is None:
         ax = plt.gca()
 
@@ -32,24 +34,50 @@ def plot_matrix(mat, cmap='gray_r', ax=None):
 
     vmin = values.min()
     vmax = values.max()
-    if ((vmax - vmin) / vmax) > 1e-3:
-        values_mean = np.mean(values)
-        values_std = np.std(values)
-        vmin = np.maximum(vmin, values_mean - 10 * values_std)
-        vmax = np.minimum(vmax, values_mean + 10 * values_std)
 
-        ax.imshow(mat, interpolation='none', cmap=cmap, vmin=vmin, vmax=vmax)
-    else:
-        mat = ((vmin + vmax) / 2) * np.ones_like(mat)
-        ax.imshow(mat, interpolation='none', cmap=cmap)
-
-    ax.imshow(mat, interpolation='none', cmap=cmap, vmin=vmin, vmax=vmax)
+    plt_image = ax.imshow(mat, interpolation='none', cmap=cmap, vmin=vmin,
+                          vmax=vmax)
     ax.grid(False)
     ax.tick_params(axis='both',
                    which='both',
                    bottom=False, top=False,
                    left=False, right=False,
                    labelbottom=False, labelleft=False)
+
+    cbar = plt.colorbar(plt_image, orientation='horizontal', pad=.05,
+                        fraction=.05, ax=ax)
+    if colorbar_labelsize is not None:
+        cbar.ax.tick_params(labelsize=colorbar_labelsize)
+
+    if labels is not None:
+        labels = np.sort(labels)
+        unique_labels = np.unique(labels)
+
+        segments = []
+        for lab in unique_labels:
+            subset = np.where(labels == lab)[0]
+            segments.append((subset[0] - 0.5, subset[-1] + 0.5))
+
+        offset = -0.05 * mat.shape[0]
+        h_segments = [((s[0], offset), (s[1], offset)) for s in segments]
+        v_segments = [((offset, s[0]), (offset, s[1])) for s in segments]
+
+        colors = sns.color_palette(labels_palette, n_colors=len(unique_labels))
+
+        if which_labels != 'both' and which_labels != 'horizontal'\
+                and which_labels != 'vertical':
+            raise ValueError('Wrong value for which_labels')
+
+        if which_labels == 'both' or which_labels == 'horizontal':
+            hlc = LineCollection(h_segments, colors=colors)
+            hlc.set_linewidth(5)
+            hlc.set_clip_on(False)
+            ax.add_collection(hlc)
+        if which_labels == 'both' or which_labels == 'vertical':
+            vlc = LineCollection(v_segments, colors=colors)
+            vlc.set_linewidth(5)
+            vlc.set_clip_on(False)
+            ax.add_collection(vlc)
 
 
 def line_plot_clustered(X, gt, ax=None):
@@ -106,20 +134,18 @@ warnings.formatwarning = lambda message, category, filename, lineno, line=None:\
     formatwarning_orig(message, category, filename, lineno, line='')
 
 
-def plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
-                       alpha=1):
+def plot_data_embedded(X, **kwargs):
     if X.shape[1] != 2 and X.shape[1] != 3:
         msg = 'Plotting first two dimensions out of {}.'.format(X.shape[1])
         warnings.warn(msg, category=RuntimeWarning)
 
         X = X[:, :2]
 
-    _plot_data_embedded(X, palette=palette, marker=marker, ax=ax,
-                        elev_azim=elev_azim, alpha=alpha)
+    _plot_data_embedded(X, **kwargs)
 
 
 def _plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
-                       alpha=1):
+                       alpha=1, edgecolors=None):
     if ax is None:
         ax = plt.gca()
 
@@ -139,9 +165,11 @@ def _plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
     try:
         colors = [c + (a,) for c, a in zip(colors, alpha)]
         alpha = None
-        edgecolors = 'k'
+        if edgecolors is None:
+            edgecolors = 'k'
     except TypeError:
-        edgecolors = colors
+        if edgecolors is None:
+            edgecolors = colors
 
     X_max = X.max(axis=0)
     X_min = X.min(axis=0)
@@ -162,7 +190,7 @@ def _plot_data_embedded(X, palette='hls', marker='o', ax=None, elev_azim=None,
         if elev_azim is not None:
             ax.view_init(elev=elev_azim[0], azim=elev_azim[1])
 
-        ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=colors, edgecolors=colors,
+        ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=colors, edgecolors=edgecolors,
                    marker=marker, alpha=alpha)
 
         ax.set_xlim(center[0] - range, center[0] + range)
