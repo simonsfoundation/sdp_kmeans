@@ -95,9 +95,8 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
     if os.path.exists('sdpnal-plus_mnist_timing.mat'):
         sdpnal_mat = loadmat('sdpnal-plus_mnist_timing.mat')
-        time_sdp_sdpnal = sdpnal_mat['times'].T
-        n_samples_range_active_sdpnal = sdpnal_mat['sizes'].T
-        print(time_sdp_sdpnal)
+        time_sdp_sdpnal = np.squeeze(sdpnal_mat['times'][:, :-3])
+        n_samples_range_active_sdpnal = np.squeeze(sdpnal_mat['sizes'][:, :-3])
     else:
         time_sdp_sdpnal = None
         n_samples_range_active_sdpnal = None
@@ -105,40 +104,48 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
     sns.set_style('whitegrid')
     sns.set_color_codes()
 
-    plt.figure()
+    plt.figure(figsize=(7, 7))
     n_samples_range_active = [ns for ns in n_samples_range
                               if ns in time_sdp_cvx]
     plt.loglog(n_samples_range_active,
                [time_sdp_cvx[ns] for ns in n_samples_range_active],
-               linewidth=2,
+               linewidth=2, color='#377eb8',
                label=r'SCS')
 
     if time_sdp_sdpnal is not None:
         plt.loglog(n_samples_range_active_sdpnal, time_sdp_sdpnal,
-                   linewidth=2,
+                   linewidth=2, color='#4daf4a',
                    label=r'SDPNAL+')
-
-    for rf in time_sdp_bm:
-        n_samples_range_active = [ns for ns in n_samples_range
-                                  if ns in time_sdp_bm[rf]]
-        plt.loglog(n_samples_range_active,
-                   [time_sdp_bm[rf][ns] for ns in n_samples_range_active],
-                   linewidth=2,
-                   label=r'non-convex SDP solver ($r={}$)'.format(k * rf))
 
     n_samples_range_active = [ns for ns in n_samples_range
                               if ns in time_sdp_cgm]
     plt.loglog(n_samples_range_active,
                [time_sdp_cgm[ns] for ns in n_samples_range_active],
-               linewidth=2,
-               label=r'conditional gradient SDP solver')
+               linewidth=2, color='#e41a1c',
+               label=r'conditional gradient solver')
+
+    rf_linestyles = ['--', ':']
+    for rf, linestyle in zip(time_sdp_bm, rf_linestyles):
+        n_samples_range_active = [ns for ns in n_samples_range
+                                  if ns in time_sdp_bm[rf]]
+        plt.loglog(n_samples_range_active,
+                   [time_sdp_bm[rf][ns] for ns in n_samples_range_active],
+                   linewidth=2, color='#984ea3', linestyle=linestyle,
+                   label=r'non-convex solver ($r={}$)'.format(k * rf))
 
     plt.xlabel('Dataset size ($n$)', fontsize='x-large')
     plt.ylabel('Time (s)', fontsize='x-large')
+
+    ax = plt.gca()
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize('x-large')
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize('x-large')
+
     plt.xlim(min(n_samples_range_active) - 3, max(n_samples_range))
-    plt.ylim(1e-2, 1e4)
     plt.yticks(10. ** np.arange(-1, 5))
-    plt.legend(loc='lower right', fontsize='x-large')
+    plt.legend(loc='lower right', ncol=1,
+               fontsize='x-large')
     plt.savefig('{}mnist_timing.pdf'.format(dir_name))
 
 
