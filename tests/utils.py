@@ -26,7 +26,8 @@ def plot_confusion_matrix(conf_mat):
 
 
 def plot_matrix(mat, cmap='gray_r', labels=None, which_labels='both',
-                labels_palette='Set1', ax=None, colorbar_labelsize=None):
+                labels_palette='Set1', ax=None, colorbar=False,
+                colorbar_labelsize=None):
     if ax is None:
         ax = plt.gca()
 
@@ -44,10 +45,11 @@ def plot_matrix(mat, cmap='gray_r', labels=None, which_labels='both',
                    left=False, right=False,
                    labelbottom=False, labelleft=False)
 
-    cbar = plt.colorbar(plt_image, orientation='horizontal', pad=.05,
-                        fraction=.05, ax=ax)
-    if colorbar_labelsize is not None:
-        cbar.ax.tick_params(labelsize=colorbar_labelsize)
+    if colorbar:
+        cbar = plt.colorbar(plt_image, orientation='horizontal', pad=.05,
+                            fraction=.05, ax=ax)
+        if colorbar_labelsize is not None:
+            cbar.ax.tick_params(labelsize=colorbar_labelsize)
 
     if labels is not None:
         labels = np.sort(labels)
@@ -58,8 +60,9 @@ def plot_matrix(mat, cmap='gray_r', labels=None, which_labels='both',
             subset = np.where(labels == lab)[0]
             segments.append((subset[0] - 0.5, subset[-1] + 0.5))
 
-        offset = -0.05 * mat.shape[0]
-        h_segments = [((s[0], offset), (s[1], offset)) for s in segments]
+        offset = -0.07 * mat.shape[0]
+        h_segments = [((s[0], mat.shape[0] - offset),
+                       (s[1], mat.shape[0] - offset)) for s in segments]
         v_segments = [((offset, s[0]), (offset, s[1])) for s in segments]
 
         colors = sns.color_palette(labels_palette, n_colors=len(unique_labels))
@@ -70,12 +73,12 @@ def plot_matrix(mat, cmap='gray_r', labels=None, which_labels='both',
 
         if which_labels == 'both' or which_labels == 'horizontal':
             hlc = LineCollection(h_segments, colors=colors)
-            hlc.set_linewidth(5)
+            hlc.set_linewidth(3)
             hlc.set_clip_on(False)
             ax.add_collection(hlc)
         if which_labels == 'both' or which_labels == 'vertical':
             vlc = LineCollection(v_segments, colors=colors)
-            vlc.set_linewidth(5)
+            vlc.set_linewidth(3)
             vlc.set_clip_on(False)
             ax.add_collection(vlc)
 
