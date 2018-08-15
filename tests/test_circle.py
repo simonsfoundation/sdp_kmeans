@@ -316,7 +316,7 @@ def test_circle_sdp_lp():
 
 if __name__ == '__main__':
     test_circles()
-    test_one_circle(from_file=True)
+    test_one_circle(from_file=False)
     test_circle_sdp_lp()
 
     plt.show()
