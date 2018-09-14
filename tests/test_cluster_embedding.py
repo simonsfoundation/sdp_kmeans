@@ -36,12 +36,11 @@ def test_thin_lines(n_clusters, target_dim):
     filename = 'thin_lines'
 
     D, Q, embeddings, clusters = clustering_embedding(X, n_clusters, target_dim)
-    Q_log = log_scale(Q)
 
     sns.set_style('white')
-    plt.figure(figsize=(12, 6), tight_layout=True)
+    plt.figure(figsize=(9, 5), tight_layout=True)
 
-    ax = plt.subplot(141)
+    ax = plt.subplot(131)
     if X.shape[1] == 2:
         plot_data_clustered(X, gt, ax=ax)
     else:
@@ -49,10 +48,9 @@ def test_thin_lines(n_clusters, target_dim):
         plot_data_clustered(X_emb, gt, ax=ax)
 
     titles = ['Input Gramian',
-              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
-              '$\mathbf{{Q}}$ (enhanced contrast)']
-    for i, (D_input, t) in enumerate(zip([D, Q, Q_log], titles)):
-        ax = plt.subplot(1, 4, i + 2)
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
+    for i, (D_input, t) in enumerate(zip([D, Q], titles)):
+        ax = plt.subplot(1, 3, i + 2)
         plot_matrix(D_input, ax=ax)
         ax.set_title(t, fontsize='xx-large')
 
@@ -85,12 +83,11 @@ def test_turntable(n_clusters, target_dim):
     filename = 'turntable'
 
     D, Q, embeddings, clusters = clustering_embedding(X, n_clusters, target_dim)
-    Q_log = log_scale(Q)
 
     sns.set_style('white')
-    plt.figure(figsize=(12, 6), tight_layout=True)
+    plt.figure(figsize=(9, 5), tight_layout=True)
 
-    ax = plt.subplot(141)
+    ax = plt.subplot(131)
     if X.shape[1] == 2:
         plot_data_clustered(X, gt, ax=ax)
     else:
@@ -98,10 +95,9 @@ def test_turntable(n_clusters, target_dim):
         plot_data_clustered(X_emb, gt, ax=ax)
 
     titles = ['Input Gramian',
-              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters),
-              '$\mathbf{{Q}}$ (enhanced contrast)']
-    for i, (D_input, t) in enumerate(zip([D, Q, Q_log], titles)):
-        ax = plt.subplot(1, 4, i + 2)
+              '$\mathbf{{Q}}$ ($K={0}$)'.format(n_clusters)]
+    for i, (D_input, t) in enumerate(zip([D, Q], titles)):
+        ax = plt.subplot(1, 3, i + 2)
         plot_matrix(D_input, ax=ax)
         ax.set_title(t, fontsize='xx-large')
 

@@ -14,10 +14,3 @@ def connected_components(sym_mat, thresh=1e-4):
                                      return_labels=True)
     clusters = [labels == i for i in range(n_comp)]
     return clusters
-
-
-def log_scale(mat):
-    mat = np.abs(mat)
-    mat *= 1e3
-    mat += 1
-    return np.log10(mat)
