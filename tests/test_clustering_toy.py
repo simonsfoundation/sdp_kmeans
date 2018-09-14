@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+import colorcet as cc
 import matplotlib.pyplot as plt
 import os
 import seaborn as sns
@@ -39,7 +39,7 @@ def test_clustering(X, gt, n_clusters, filename):
 
 if __name__ == '__main__':
     X, gt = toy.gaussian_blobs()
-    test_clustering(X, gt, 16, 'gaussian_blobs')
+    test_clustering(X, gt, 6, 'gaussian_blobs')
 
     X, gt = toy.circles()
     test_clustering(X, gt, 16, 'circles')
