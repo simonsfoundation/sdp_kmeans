@@ -65,7 +65,8 @@ def mnist_timing(k, n_samples_range, rank_factors=[4, 8], digit=1,
 
             t = timeit.default_timer()
             D = dot_matrix(X)
-            Q_cgm = sdp_km_conditional_gradient(D, k, use_line_search=False)
+            Q_cgm = sdp_km_conditional_gradient(D, k, use_line_search=False,
+                                                stop_tol_max=1e-2)
             t = timeit.default_timer() - t
             time_sdp_cgm[n_samples] = t
             if n_samples <= 1000:
