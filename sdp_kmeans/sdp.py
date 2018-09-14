@@ -139,9 +139,9 @@ def sdp_km_burer_monteiro(X, n_clusters, rank=None, maxiter=1e3, tol=1e-5):
 
 
 def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
-                                stop_tol_max=1e-2, stop_tol_rmse=1e-4,
+                                stop_tol_max=1e-3, stop_tol_rmse=1e-4,
                                 n_inner_iter=15,
-                                use_line_search=True,
+                                use_line_search=False,
                                 verbose=False, track_stats=False):
     n = len(D)
     one_over_n = 1. / n
@@ -172,23 +172,30 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
         tol = (t + 1) ** -1
         return sp.linalg.eigsh(A, k=1, which='SA', tol=tol)
 
-    def line_search(update, current, lagrange_lower_bound, t):
-        alpha_lower = 0
-        alpha_upper = 1
+    def line_search(update, current, lagrange_lower_bound, t, tol=1e-5):
+        gr = (np.sqrt(5) + 1) / 2
+        a = 0
+        b = 1
 
-        while np.abs(alpha_lower - alpha_upper) > 1e-4:
-            lin_comb_lower = alpha_lower * update + (1 - alpha_lower) * current
-            lin_comb_upper = alpha_upper * update + (1 - alpha_upper) * current
-
-            obj_lower = lagrangian(lin_comb_lower, lagrange_lower_bound, t)
-            obj_upper = lagrangian(lin_comb_upper, lagrange_lower_bound, t)
-
-            if obj_upper < obj_lower:
-                alpha_lower = 0.5 * (alpha_lower + alpha_upper)
+        c = b - (b - a) / gr
+        d = a + (b - a) / gr
+        while abs(c - d) > tol:
+            convex_comb_c = c * update + (1 - c) * current
+            convex_comb_d = d * update + (1 - d) * current
+            fc = lagrangian(convex_comb_c, lagrange_lower_bound, t)
+            fd = lagrangian(convex_comb_d, lagrange_lower_bound, t)
+            if fc < fd:
+                b = d
             else:
-                alpha_upper = 0.5 * (alpha_lower + alpha_upper)
+                a = c
 
-        return alpha_lower
+            # we recompute both c and d here to avoid loss of precision
+            # which may lead to incorrect results or infinite loop
+            c = b - (b - a) / gr
+            d = a + (b - a) / gr
+
+        return (b + a) / 2
+
 
     if track_stats or verbose:
         rmse_list = []
@@ -206,10 +213,8 @@ def sdp_km_conditional_gradient(D, n_clusters, max_iter=2e3,
             if s < 0:
                 update = (n_clusters - 1) * np.outer(v, v)
                 if use_line_search:
-                    eta_ls = line_search(update, Q, lagrange_lower_bound,
-                                         t * n_inner_iter + inner_it)
-                    eta_fix = 2. / (t * n_inner_iter + inner_it + 2)
-                    eta = np.maximum(eta_ls, eta_fix)
+                    eta = line_search(update, Q, lagrange_lower_bound,
+                                      t * n_inner_iter + inner_it)
                 else:
                     eta = 2. / (t * n_inner_iter + inner_it + 2)
                 Q = (1 - eta) * Q + eta * update
