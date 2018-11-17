@@ -27,7 +27,10 @@ def sdp_kmeans(X, n_clusters, method='cvx'):
 
 def sdp_km(D, n_clusters, max_iters=5000, eps=1e-5):
     ones = np.ones((D.shape[0], 1))
-    Z = cp.Semidef(D.shape[0])
+    try:
+        Z = cp.Variable(D.shape, SDP=True)
+    except TypeError:
+        Z = cp.Semidef(D.shape[0])
     objective = cp.Maximize(cp.trace(D * Z))
     constraints = [Z >= 0,
                    Z * ones == ones,
