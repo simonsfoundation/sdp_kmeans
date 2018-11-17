@@ -10,7 +10,6 @@ import sklearn.manifold as skman
 import sklearn.neighbors as skneigh
 from sdp_kmeans import sdp_kmeans
 from data import toy, real
-from tests.utils import plot_matrix, plot_data_clustered
 
 dir_name = '../results/'
 if not os.path.exists(dir_name):

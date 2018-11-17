@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import seaborn as sns
-from sdp_kmeans import connected_components, log_scale, sdp_kmeans,\
-    spectral_embedding
+from sdp_kmeans import connected_components, sdp_kmeans, spectral_embedding
 from data import toy, real
 from tests.utils import plot_matrix, plot_data_clustered, plot_data_embedded,\
     plot_images_embedded

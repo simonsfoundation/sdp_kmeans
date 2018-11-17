@@ -2,7 +2,7 @@ import colorcet as cc
 import matplotlib.pyplot as plt
 import os
 import seaborn as sns
-from sdp_kmeans import log_scale, sdp_kmeans
+from sdp_kmeans import sdp_kmeans
 from data import toy
 from tests.utils import plot_matrix, plot_data_clustered
 
